@@ -19,6 +19,9 @@ const processCss = async () => {
 };
 
 const buildConfig = {
+  define: {
+    'process.env.FRONTEND_PORT': JSON.stringify(process.env.FRONTEND_PORT || '3000'),
+  },
   entryPoints: ['src/index.tsx'],
   bundle: true,
   outfile: 'dist/bundle.js',
@@ -113,9 +116,9 @@ if (isDev) {
       clients.splice(clients.indexOf(ws), 1);
     });
   });
-
-  server.listen(3000, async () => {
-    console.log('✅ Dev server running on http://localhost:3000');
+  const PORT = process.env.FRONTEND_PORT;
+  server.listen(PORT, async () => {
+    console.log(`✅ Dev server running on http://localhost:${PORT}`);
     await build();
     watchFiles('src');
   });
