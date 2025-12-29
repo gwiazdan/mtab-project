@@ -1,0 +1,40 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - ./backend:/app
+      - ./db:/app/db
+    environment:
+      - BACKEND_PORT=${BACKEND_PORT:-8000}
+    command: poetry run python main.py
+    networks:
+      - mtab-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - DEV_MODE=true
+      - BACKEND_URL=http://localhost:${BACKEND_PORT:-8000}
+    command: npm run dev
+    depends_on:
+      - backend
+    networks:
+      - mtab-network
+
+volumes:
+  db:
+    driver: local
+
+networks:
+  mtab-network:
+    driver: bridge

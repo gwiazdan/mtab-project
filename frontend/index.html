@@ -4,22 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FastAPI + React</title>
-    <link rel="stylesheet" href="/dist/globals.css">
+    <link rel="stylesheet" href="/globals.css?v=1767035624858">
   </head>
   <body>
     <div id="root"></div>
-    <script src="/dist/bundle.js"></script>
+    <script src="/bundle.js?v=1767035624858"></script>
     <script>
       // Hot reload WebSocket
-      if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-        const ws = new WebSocket('ws://' + location.host);
+      (function setupHotReload() {
+        const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const ws = new WebSocket(protocol + '//' + location.host);
         ws.onmessage = (e) => {
+          console.log('HMR message received:', e.data);
           if (e.data === 'reload') {
+            console.log('Reloading page...');
             location.reload();
           }
         };
-        ws.onerror = () => console.log('Hot reload disabled');
-      }
+        ws.onerror = (err) => {
+          console.error('Hot reload connection error:', err);
+        };
+        ws.onclose = () => {
+          console.log('Hot reload disconnected, retrying in 3s...');
+          setTimeout(setupHotReload, 3000);
+        };
+        ws.onopen = () => {
+          console.log('Hot reload connected!');
+        };
+      })();
     </script>
   </body>
 </html>

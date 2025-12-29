@@ -1,0 +1,6 @@
+node_modules/
+dist/
+bundle.js
+globals.css
+*.map
+.DS_Store

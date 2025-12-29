@@ -1,0 +1,32 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - ./db:/app/db
+    environment:
+      - BACKEND_PORT=${BACKEND_PORT:-8000}
+    command: poetry run python main.py
+    networks:
+      - mtab-network
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    environment:
+      - DEV_MODE=false
+      - BACKEND_URL=http://backend:${BACKEND_PORT:-8000}
+    networks:
+      - mtab-network
+
+volumes:
+  db:
+    driver: local
+
+networks:
+  mtab-network:
+    driver: bridge

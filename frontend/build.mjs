@@ -8,14 +8,19 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const isDev = process.argv.includes('--dev');
+const PORT = process.env.FRONTEND_PORT || 3000;
 const clients = [];
 
 const processCss = async () => {
   const input = fs.readFileSync('src/globals.css', 'utf8');
   const output = input; // Tailwind v4 procesuje się via PostCSS w bundlerze
 
-  fs.mkdirSync('dist', { recursive: true });
-  fs.writeFileSync('dist/globals.css', output);
+  if (isDev) {
+    fs.writeFileSync('globals.css', output);
+  } else {
+    fs.mkdirSync('dist', { recursive: true });
+    fs.writeFileSync('dist/globals.css', output);
+  }
 };
 
 const buildConfig = {
@@ -37,6 +42,7 @@ const buildConfig = {
 if (isDev) {
   const buildConfigDev = {
     ...buildConfig,
+    outfile: 'bundle.js', // Dev: build to root for direct serving
     format: 'iife',
     sourcemap: true,
     define: {
@@ -51,6 +57,20 @@ if (isDev) {
     try {
       await processCss();
       await esbuild.build(buildConfigDev);
+
+      // Generate index.html with cache-busting query string
+      const timestamp = Date.now();
+      let html = fs.readFileSync('index.html', 'utf8');
+      html = html.replace(
+        'src="/bundle.js"',
+        `src="/bundle.js?v=${timestamp}"`
+      );
+      html = html.replace(
+        'href="/globals.css"',
+        `href="/globals.css?v=${timestamp}"`
+      );
+      fs.writeFileSync('index.html', html);
+
       console.log('✅ Build complete');
       // Notify clients to refresh
       clients.forEach(ws => {
@@ -80,7 +100,9 @@ if (isDev) {
 
   // HTTP Server with WebSocket support
   const server = http.createServer((req, res) => {
-    let filePath = '.' + req.url;
+    // Remove query string from URL
+    const urlWithoutQuery = req.url.split('?')[0];
+    let filePath = '.' + urlWithoutQuery;
     if (filePath === './') filePath = './index.html';
 
     const extname = path.extname(filePath);
@@ -116,7 +138,7 @@ if (isDev) {
       clients.splice(clients.indexOf(ws), 1);
     });
   });
-  const PORT = process.env.FRONTEND_PORT;
+
   server.listen(PORT, async () => {
     console.log(`✅ Dev server running on http://localhost:${PORT}`);
     await build();
@@ -126,6 +148,7 @@ if (isDev) {
 } else {
   const buildConfigProd = {
     ...buildConfig,
+    outfile: 'dist/bundle.js', // Prod: build to dist/
     format: 'iife',
     minify: true,
     sourcemap: false,
@@ -138,6 +161,8 @@ if (isDev) {
     try {
       await processCss();
       await esbuild.build(buildConfigProd);
+      // Copy index.html to dist
+      fs.copyFileSync('index.html', 'dist/index.html');
       console.log('✅ Build complete: dist/bundle.js');
     } catch (err) {
       console.error(err);
