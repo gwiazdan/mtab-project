@@ -6,7 +6,6 @@ services:
       - "${BACKEND_PORT:-8000}:8000"
     volumes:
       - ./backend:/app
-      - ./db:/app/db
     environment:
       - BACKEND_PORT=${BACKEND_PORT:-8000}
     command: poetry run python main.py

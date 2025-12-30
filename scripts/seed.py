@@ -94,19 +94,143 @@ def seed_publishers():
     return publishers
 
 
+def seed_books(authors, genres, publishers):
+    """Create test books with relationships"""
+    print("\n📖 Creating books...")
+
+    if not authors or not genres or not publishers:
+        print("  ⚠️  Skipping books - missing authors, genres, or publishers")
+        return []
+    
+    books_data = [
+        {
+            "title": "Harry Potter and the Philosopher's Stone",
+            "description": "The first book in the Harry Potter series",
+            "price": 15.99,
+            "stock": 50,
+            "isbn": "978-0747532699",
+            "published_year": 1997,
+            "publisher_id": publishers[0]["id"],
+            "author_ids": [authors[0]["id"]],
+            "genre_ids": [genres[0]["id"]]  # Fantasy
+        },
+        {
+            "title": "A Game of Thrones",
+            "description": "The first book in A Song of Ice and Fire",
+            "price": 18.99,
+            "stock": 40,
+            "isbn": "978-0553103540",
+            "published_year": 1996,
+            "publisher_id": publishers[3]["id"],  # Tor Books
+            "author_ids": [authors[1]["id"]],
+            "genre_ids": [genres[0]["id"]]  # Fantasy
+        },
+        {
+            "title": "The Hobbit",
+            "description": "A fantasy adventure novel",
+            "price": 14.99,
+            "stock": 60,
+            "isbn": "978-0547928227",
+            "published_year": 1937,
+            "publisher_id": publishers[1]["id"],  # Penguin
+            "author_ids": [authors[2]["id"]],
+            "genre_ids": [genres[0]["id"]]  # Fantasy
+        },
+        {
+            "title": "The Shining",
+            "description": "A psychological horror novel",
+            "price": 12.99,
+            "stock": 35,
+            "isbn": "978-0385333312",
+            "published_year": 1977,
+            "publisher_id": publishers[2]["id"],  # HarperCollins
+            "author_ids": [authors[3]["id"]],
+            "genre_ids": [genres[4]["id"]]  # Horror
+        },
+        {
+            "title": "Murder on the Orient Express",
+            "description": "A detective mystery novel",
+            "price": 11.99,
+            "stock": 45,
+            "isbn": "978-0062693556",
+            "published_year": 1934,
+            "publisher_id": publishers[4]["id"],  # Doubleday
+            "author_ids": [authors[4]["id"]],
+            "genre_ids": [genres[2]["id"]]  # Mystery
+        },
+    ]
+    
+    books = []
+    for book_data in books_data:
+        response = requests.post(f"{BASE_URL}/books", json=book_data)
+        if response.status_code == 201:
+            books.append(response.json())
+            print(f"  ✅ {book_data['title']}")
+        else:
+            print(f"  ❌ Failed to create {book_data['title']}: {response.text}")
+    
+    return books
+
+
+def seed_orders(books):
+    """Create test orders with items"""
+    print("\n🛒 Creating orders...")
+    
+    if len(books) < 2:
+        print("  ⚠️  Skipping orders - need at least 2 books")
+        return
+    
+    # Create one order
+    order_data = {
+        "customer_name": "John Doe",
+        "email": "john@example.com",
+        "phone": "+1234567890",
+        "status": "pending"
+    }
+    
+    response = requests.post(f"{BASE_URL}/orders", json=order_data)
+    if response.status_code != 201:
+        print(f"  ❌ Failed to create order: {response.text}")
+        return
+    
+    order = response.json()
+    print(f"  ✅ Order #{order['id']}")
+    
+    # Add 2 random books to order
+    import random
+    selected_books = random.sample(books, 2)
+    
+    for book in selected_books:
+        item_data = {
+            "order_id": order["id"],
+            "book_id": book["id"],
+            "quantity": random.randint(1, 3)
+        }
+        
+        response = requests.post(f"{BASE_URL}/orders/items", json=item_data)
+        if response.status_code == 201:
+            print(f"    ✅ Added {book['title']} x{item_data['quantity']}")
+        else:
+            print(f"    ❌ Failed to add item: {response.text}")
+
+
 def main():
     """Main seed function"""
     print("🌱 Starting database seed...\n")
-
+    
     if not wait_for_api():
         sys.exit(1)
-
-    seed_authors()
-    seed_genres()
-    seed_publishers()
-
+    
+    authors = seed_authors()
+    genres = seed_genres()
+    publishers = seed_publishers()
+    books = seed_books(authors, genres, publishers)
+    seed_orders(books)
+    
     print("\n✨ Seed completed!")
 
 
 if __name__ == "__main__":
     main()
+
+
