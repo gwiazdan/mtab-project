@@ -58,19 +58,6 @@ if (isDev) {
       await processCss();
       await esbuild.build(buildConfigDev);
 
-      // Generate index.html with cache-busting query string
-      const timestamp = Date.now();
-      let html = fs.readFileSync('index.html', 'utf8');
-      html = html.replace(
-        'src="/bundle.js"',
-        `src="/bundle.js?v=${timestamp}"`
-      );
-      html = html.replace(
-        'href="/globals.css"',
-        `href="/globals.css?v=${timestamp}"`
-      );
-      fs.writeFileSync('index.html', html);
-
       console.log('✅ Build complete');
       // Notify clients to refresh
       clients.forEach(ws => {

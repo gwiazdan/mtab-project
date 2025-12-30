@@ -31,6 +31,18 @@ services:
     networks:
       - mtab-network
 
+  seed:
+    image: python:3.13-slim
+    volumes:
+      - ./scripts:/scripts
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: bash -c "pip install requests && python /scripts/seed.py"
+    depends_on:
+      - backend
+    networks:
+      - mtab-network
+
 volumes:
   db:
     driver: local
