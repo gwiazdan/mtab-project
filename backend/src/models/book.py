@@ -2,7 +2,6 @@ from sqlalchemy import Column, Integer, String, Text, Float, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from src.core.database import Base
 
-# Association table for many-to-many relationship between Book and Author
 book_author = Table(
     "book_author",
     Base.metadata,
@@ -10,7 +9,6 @@ book_author = Table(
     Column("author_id", Integer, ForeignKey("authors.id"), primary_key=True),
 )
 
-# Association table for many-to-many relationship between Book and Genre
 book_genre = Table(
     "book_genre",
     Base.metadata,
@@ -31,7 +29,6 @@ class Book(Base):
     published_year = Column(Integer, nullable=True)
     publisher_id = Column(Integer, ForeignKey("publishers.id"), nullable=False)
 
-    # Relationships
     publisher = relationship("Publisher", back_populates="books")
     authors = relationship("Author", secondary=book_author, back_populates="books")
     genres = relationship("Genre", secondary=book_genre, back_populates="books")

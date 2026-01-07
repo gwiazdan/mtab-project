@@ -12,6 +12,5 @@ class OrderItem(Base):
     quantity = Column(Integer, nullable=False)
     price_at_purchase = Column(Float, nullable=False)
 
-    # Relationships
     order = relationship("Order", back_populates="items")
     book = relationship("Book", back_populates="order_items")

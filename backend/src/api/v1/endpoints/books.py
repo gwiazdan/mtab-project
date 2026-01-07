@@ -28,12 +28,10 @@ async def get_book(book_id: int, db: Session = Depends(get_db)):
 async def create_book(book: BookCreate, db: Session = Depends(get_db)):
     """Create a new book with relationships"""
 
-    # Validate publisher exists
     publisher = db.query(Publisher).filter(Publisher.id == book.publisher_id).first()
     if not publisher:
         raise HTTPException(status_code=404, detail="Publisher not found")
 
-    # Validate all authors exist
     if book.author_ids:
         authors = db.query(Author).filter(Author.id.in_(book.author_ids)).all()
         if len(authors) != len(book.author_ids):
@@ -41,7 +39,6 @@ async def create_book(book: BookCreate, db: Session = Depends(get_db)):
     else:
         authors = []
 
-    # Validate all genres exist
     if book.genre_ids:
         genres = db.query(Genre).filter(Genre.id.in_(book.genre_ids)).all()
         if len(genres) != len(book.genre_ids):
@@ -49,7 +46,6 @@ async def create_book(book: BookCreate, db: Session = Depends(get_db)):
     else:
         genres = []
 
-    # Create book
     db_book = Book(
         title=book.title,
         description=book.description,
@@ -60,7 +56,6 @@ async def create_book(book: BookCreate, db: Session = Depends(get_db)):
         publisher_id=book.publisher_id
     )
 
-    # Add relationships
     for author in authors:
         db_book.authors.append(author)
     for genre in genres:

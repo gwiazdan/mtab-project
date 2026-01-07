@@ -2,38 +2,15 @@
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
-from src.core.database import Base, get_db
-from src.models import Author, Publisher, Genre, Book, Order, OrderItem
+
 from src.core.config import settings
-from src.api.v1.router import api_v1_router
-
-
-@pytest.fixture(scope="function")
-def test_db():
-    """Create a temporary test database"""
-    engine = create_engine(
-        "sqlite:///:memory:",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
-    Base.metadata.create_all(bind=engine)
-
-    TestSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-    db = TestSessionLocal()
-
-    yield db
-
-    db.close()
-    Base.metadata.drop_all(bind=engine)
+from src.core.database import get_db
+from src.api.v1.routes.router import api_v1_router
 
 
 @pytest.fixture
 def client(test_db):
-    """Create test client with test database"""
-    # Create a test app without lifespan
+    """Create test client with test database."""
     test_app = FastAPI(
         title=settings.app_name,
         description=settings.app_description,

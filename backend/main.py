@@ -7,7 +7,7 @@ from pathlib import Path
 
 from src.core.config import settings
 from src.core.database import create_tables
-from src.api.v1.router import api_v1_router
+from src.api.v1.routes.router import api_v1_router
 
 env_path = Path(__file__).parent.parent / ".env"
 load_dotenv(env_path)

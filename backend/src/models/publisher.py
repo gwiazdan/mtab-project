@@ -11,5 +11,4 @@ class Publisher(Base):
     address = Column(String(255), nullable=True)
     contact = Column(String(255), nullable=True)
 
-    # Relationships
     books = relationship("Book", back_populates="publisher", cascade="all, delete-orphan")

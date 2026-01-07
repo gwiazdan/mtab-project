@@ -32,7 +32,7 @@ async def create_order(order: OrderCreate, db: Session = Depends(get_db)):
         email=order.email,
         phone=order.phone,
         status=order.status,
-        total_price=0.0  # Will be updated when items are added
+        total_price=0.0
     )
     db.add(db_order)
     db.commit()
@@ -44,17 +44,14 @@ async def create_order(order: OrderCreate, db: Session = Depends(get_db)):
 async def add_order_item(item: OrderItemCreate, db: Session = Depends(get_db)):
     """Add item to order"""
 
-    # Validate order exists
     order = db.query(Order).filter(Order.id == item.order_id).first()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
 
-    # Validate book exists
     book = db.query(Book).filter(Book.id == item.book_id).first()
     if not book:
         raise HTTPException(status_code=404, detail="Book not found")
 
-    # Create order item with price snapshot
     db_item = OrderItem(
         order_id=item.order_id,
         book_id=item.book_id,
@@ -63,7 +60,6 @@ async def add_order_item(item: OrderItemCreate, db: Session = Depends(get_db)):
     )
     db.add(db_item)
 
-    # Update order total price
     order.total_price += book.price * item.quantity
 
     db.commit()

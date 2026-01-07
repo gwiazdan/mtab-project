@@ -1,22 +1,26 @@
+"""Shared test fixtures and configuration."""
 import pytest
-import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
+
 from src.core.database import Base
-from src.models import Author, Publisher, Genre, Book, Order, OrderItem
 
 
 @pytest.fixture(scope="function")
 def test_db():
-    """Create a temporary test database"""
-    # Use in-memory SQLite for tests
-    engine = create_engine("sqlite:///:memory:")
+    """Create a temporary in-memory SQLite database for testing."""
+    engine = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
     Base.metadata.create_all(bind=engine)
-    
+
     TestSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     db = TestSessionLocal()
-    
+
     yield db
-    
+
     db.close()
     Base.metadata.drop_all(bind=engine)

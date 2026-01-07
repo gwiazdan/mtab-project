@@ -15,5 +15,4 @@ class Order(Base):
     total_price = Column(Float, nullable=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
-    # Relationships
     items = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
