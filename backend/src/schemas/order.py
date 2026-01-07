@@ -1,15 +1,14 @@
 """Order schemas"""
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class BookMinimal(BaseModel):
     """Minimal book info for order items"""
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     title: str
     price: float
-
-    class Config:
-        from_attributes = True
 
 
 class OrderItemCreate(BaseModel):
@@ -21,15 +20,14 @@ class OrderItemCreate(BaseModel):
 
 class OrderItemResponse(BaseModel):
     """Order item response schema"""
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     order_id: int
     book_id: int
     quantity: int
     price_at_purchase: float
     book: BookMinimal
-
-    class Config:
-        from_attributes = True
 
 
 class OrderCreate(BaseModel):
@@ -42,6 +40,8 @@ class OrderCreate(BaseModel):
 
 class OrderResponse(BaseModel):
     """Order response schema"""
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     customer_name: str
     email: str
@@ -49,7 +49,4 @@ class OrderResponse(BaseModel):
     status: str
     total_price: float
     items: list[OrderItemResponse] = []
-
-    class Config:
-        from_attributes = True
 

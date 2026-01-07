@@ -1,5 +1,5 @@
 """Book schemas"""
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class BookCreate(BaseModel):
@@ -17,6 +17,8 @@ class BookCreate(BaseModel):
 
 class BookResponse(BaseModel):
     """Book response schema"""
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     title: str
     description: str | None = None
@@ -25,6 +27,3 @@ class BookResponse(BaseModel):
     isbn: str | None = None
     published_year: int | None = None
     publisher_id: int
-
-    class Config:
-        from_attributes = True

@@ -1,5 +1,5 @@
 """Genre schemas"""
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class GenreCreate(BaseModel):
@@ -10,9 +10,8 @@ class GenreCreate(BaseModel):
 
 class GenreResponse(BaseModel):
     """Genre response schema"""
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     name: str
     description: str | None = None
-
-    class Config:
-        from_attributes = True
