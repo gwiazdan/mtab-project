@@ -1,5 +1,5 @@
 """Order schemas"""
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, EmailStr
 
 
 class BookMinimal(BaseModel):
@@ -28,6 +28,21 @@ class OrderItemResponse(BaseModel):
     quantity: int
     price_at_purchase: float
     book: BookMinimal
+
+
+class OrderItemCheckout(BaseModel):
+    """Order item during checkout"""
+    book_id: int
+    quantity: int = Field(gt=0)
+
+
+class OrderCreateCheckout(BaseModel):
+    """Order creation schema with items (checkout flow)"""
+    customer_name: str = Field(min_length=1, max_length=255)
+    email: EmailStr
+    phone: str | None = Field(None, max_length=20)
+    total_price: float = Field(gt=0)
+    items: list[OrderItemCheckout] = Field(min_length=1)
 
 
 class OrderCreate(BaseModel):

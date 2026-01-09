@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from src.core.database import get_db
 from src.models import Order, OrderItem, Book
-from src.schemas.order import OrderCreate, OrderResponse, OrderItemCreate, OrderItemResponse
+from src.schemas.order import OrderCreate, OrderResponse, OrderItemCreate, OrderItemResponse, OrderCreateCheckout
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 
@@ -25,16 +25,48 @@ async def get_order(order_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/", response_model=OrderResponse, status_code=201)
-async def create_order(order: OrderCreate, db: Session = Depends(get_db)):
-    """Create a new order"""
+async def create_order_checkout(order: OrderCreateCheckout, db: Session = Depends(get_db)):
+    """Create a new order with items (checkout flow)"""
+
+    # Validate all books exist and have sufficient stock
+    books_data = {}
+
+    for item in order.items:
+        book = db.query(Book).filter(Book.id == item.book_id).first()
+        if not book:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Book with ID {item.book_id} not found"
+            )
+        if book.stock < item.quantity:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Insufficient stock for '{book.title}'. Available: {book.stock}, Requested: {item.quantity}"
+            )
+        books_data[item.book_id] = (book, item.quantity)
+
+    # Create order with total_price from frontend (includes VAT + shipping)
     db_order = Order(
         customer_name=order.customer_name,
         email=order.email,
         phone=order.phone,
-        status=order.status,
-        total_price=0.0
+        status="pending",
+        total_price=order.total_price
     )
     db.add(db_order)
+    db.flush()  # Get order ID without committing
+
+    # Create order items and reduce stock
+    for book_id, (book, quantity) in books_data.items():
+        db_item = OrderItem(
+            order_id=db_order.id,
+            book_id=book_id,
+            quantity=quantity,
+            price_at_purchase=book.price
+        )
+        db.add(db_item)
+        book.stock -= quantity
+
     db.commit()
     db.refresh(db_order)
     return db_order

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Book } from '../types/book';
+import { useCart } from '../context/CartContext';
 
 interface PaginatedResponse {
   items: Book[];
@@ -16,6 +17,7 @@ const Shop: React.FC = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const { addItem } = useCart();
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -111,6 +113,7 @@ const Shop: React.FC = () => {
               </span>
               <button
                 type="button"
+                onClick={() => addItem(book)}
                 className="inline-flex items-center gap-1.5 text-black bg-white hover:bg-black hover:text-white rounded-lg font-semibold px-3 py-2 transition-colors text-sm cursor-pointer"
               >
                 <svg className="w-6 h-6" viewBox="0 -1.02 19.036 19.036" xmlns="http://www.w3.org/2000/svg">
