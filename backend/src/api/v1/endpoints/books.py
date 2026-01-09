@@ -1,18 +1,50 @@
 """Books endpoints"""
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from src.core.database import get_db
 from src.models import Book, Author, Genre, Publisher
 from src.schemas.book import BookCreate, BookResponse
+from pydantic import BaseModel
 
 router = APIRouter(prefix="/books", tags=["books"])
 
 
-@router.get("/", response_model=list[BookResponse])
-async def list_books(db: Session = Depends(get_db)):
-    """Get all books"""
-    books = db.query(Book).all()
-    return books
+class PaginatedResponse(BaseModel):
+    """Paginated response schema"""
+    items: list[BookResponse]
+    total: int
+    page: int
+    limit: int
+    pages: int
+
+
+@router.get("/", response_model=PaginatedResponse)
+async def list_books(
+    page: int = Query(1, ge=1),
+    limit: int = Query(12, ge=1, le=100),
+    db: Session = Depends(get_db)
+):
+    """Get all books with stock > 0, paginated"""
+    # Query books with stock > 0
+    query = db.query(Book).filter(Book.stock > 0)
+
+    # Get total count
+    total = query.count()
+
+    # Calculate pagination
+    offset = (page - 1) * limit
+    books = query.offset(offset).limit(limit).all()
+
+    # Calculate total pages
+    pages = (total + limit - 1) // limit
+
+    return {
+        "items": books,
+        "total": total,
+        "page": page,
+        "limit": limit,
+        "pages": pages
+    }
 
 
 @router.get("/{book_id}", response_model=BookResponse)

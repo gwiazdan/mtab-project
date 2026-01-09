@@ -4,6 +4,8 @@ import fs from 'fs';
 import path from 'path';
 import { WebSocketServer } from 'ws';
 import { fileURLToPath } from 'url';
+import postcss from 'postcss';
+import tailwindcss from '@tailwindcss/postcss';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -13,7 +15,12 @@ const clients = [];
 
 const processCss = async () => {
   const input = fs.readFileSync('src/globals.css', 'utf8');
-  const output = input; // Tailwind v4 procesuje się via PostCSS w bundlerze
+  const result = await postcss([tailwindcss({ config: './tailwind.config.mjs' })]).process(input, {
+    from: 'src/globals.css',
+    to: undefined
+  });
+
+  const output = result.css;
 
   if (isDev) {
     fs.writeFileSync('globals.css', output);
@@ -42,13 +49,21 @@ const buildConfig = {
 if (isDev) {
   const buildConfigDev = {
     ...buildConfig,
-    outfile: 'bundle.js', // Dev: build to root for direct serving
+    outfile: 'bundle.js',
     format: 'iife',
     sourcemap: true,
     define: {
       'process.env.NODE_ENV': '"development"'
     }
   };
+
+  // Cleanup old bundle files on start
+  try {
+    if (fs.existsSync('bundle.js')) fs.unlinkSync('bundle.js');
+    if (fs.existsSync('bundle.js.map')) fs.unlinkSync('bundle.js.map');
+  } catch (err) {
+    console.warn('Could not cleanup old bundle files:', err.message);
+  }
 
   let isBuilding = false;
 
@@ -90,6 +105,15 @@ if (isDev) {
     // Remove query string from URL
     const urlWithoutQuery = req.url.split('?')[0];
     let filePath = '.' + urlWithoutQuery;
+
+    // Try public folder first, then root
+    if (!fs.existsSync(filePath)) {
+      const publicPath = './public' + urlWithoutQuery;
+      if (fs.existsSync(publicPath)) {
+        filePath = publicPath;
+      }
+    }
+
     if (filePath === './') filePath = './index.html';
 
     const extname = path.extname(filePath);
@@ -101,6 +125,7 @@ if (isDev) {
     if (extname === '.tsx') contentType = 'application/typescript';
     if (extname === '.css') contentType = 'text/css';
     if (extname === '.json') contentType = 'application/json';
+    if (extname === '.svg') contentType = 'image/svg+xml';
 
     fs.readFile(filePath, (err, content) => {
       if (err) {

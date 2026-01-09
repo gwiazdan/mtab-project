@@ -1,11 +1,5 @@
-import React from 'react';
+import router from './router';
 
-const App: React.FC = () => {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      123
-    </div>
-  );
-};
-
-export default App;
+export default function App() {
+  return router;
+}

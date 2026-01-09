@@ -34,6 +34,13 @@ def seed_authors():
         {"name": "J.R.R. Tolkien", "bio": "British writer, creator of Middle-earth"},
         {"name": "Stephen King", "bio": "American horror and suspense novelist"},
         {"name": "Agatha Christie", "bio": "British mystery and crime writer"},
+        {"name": "Isaac Asimov", "bio": "American writer and professor of biochemistry"},
+        {"name": "Arthur C. Clarke", "bio": "British science fiction writer and inventor"},
+        {"name": "Philip K. Dick", "bio": "American science fiction novelist"},
+        {"name": "Ursula K. Le Guin", "bio": "American author of science fiction and fantasy"},
+        {"name": "Terry Pratchett", "bio": "British fantasy author, known for Discworld"},
+        {"name": "Neil Gaiman", "bio": "British and American author of fantasy and science fiction"},
+        {"name": "Brandon Sanderson", "bio": "American fantasy writer and author of Mistborn"},
     ]
 
     authors = []
@@ -57,6 +64,9 @@ def seed_genres():
         {"name": "Mystery", "description": "Mystery and detective stories"},
         {"name": "Romance", "description": "Romance and love stories"},
         {"name": "Horror", "description": "Horror and thriller stories"},
+        {"name": "Adventure", "description": "Adventure and exploration stories"},
+        {"name": "Dystopian", "description": "Dystopian and post-apocalyptic stories"},
+        {"name": "Comedy", "description": "Humorous and comedic stories"},
     ]
 
     genres = []
@@ -80,6 +90,8 @@ def seed_publishers():
         {"name": "HarperCollins", "address": "New York, USA", "contact": "info@harpercollins.com"},
         {"name": "Tor Books", "address": "New York, USA", "contact": "info@torbooks.com"},
         {"name": "Doubleday", "address": "New York, USA", "contact": "info@doubleday.com"},
+        {"name": "Bantam Books", "address": "New York, USA", "contact": "info@bantam.com"},
+        {"name": "Simon & Schuster", "address": "New York, USA", "contact": "info@simonschuster.com"},
     ]
 
     publishers = []
@@ -101,11 +113,11 @@ def seed_books(authors, genres, publishers):
     if not authors or not genres or not publishers:
         print("  ⚠️  Skipping books - missing authors, genres, or publishers")
         return []
-    
+
     books_data = [
         {
             "title": "Harry Potter and the Philosopher's Stone",
-            "description": "The first book in the Harry Potter series",
+            "description": "The first book in the Harry Potter series about a young wizard discovering his magical powers",
             "price": 15.99,
             "stock": 50,
             "isbn": "978-0747532699",
@@ -116,7 +128,7 @@ def seed_books(authors, genres, publishers):
         },
         {
             "title": "A Game of Thrones",
-            "description": "The first book in A Song of Ice and Fire",
+            "description": "The first book in A Song of Ice and Fire, a tale of political intrigue and warfare",
             "price": 18.99,
             "stock": 40,
             "isbn": "978-0553103540",
@@ -127,18 +139,18 @@ def seed_books(authors, genres, publishers):
         },
         {
             "title": "The Hobbit",
-            "description": "A fantasy adventure novel",
+            "description": "A fantasy adventure novel about a hobbit's unexpected journey",
             "price": 14.99,
             "stock": 60,
             "isbn": "978-0547928227",
             "published_year": 1937,
             "publisher_id": publishers[1]["id"],  # Penguin
             "author_ids": [authors[2]["id"]],
-            "genre_ids": [genres[0]["id"]]  # Fantasy
+            "genre_ids": [genres[0]["id"], genres[5]["id"]]  # Fantasy, Adventure
         },
         {
             "title": "The Shining",
-            "description": "A psychological horror novel",
+            "description": "A psychological horror novel about a family isolated in a haunted hotel",
             "price": 12.99,
             "stock": 35,
             "isbn": "978-0385333312",
@@ -149,7 +161,7 @@ def seed_books(authors, genres, publishers):
         },
         {
             "title": "Murder on the Orient Express",
-            "description": "A detective mystery novel",
+            "description": "A detective mystery novel featuring Hercule Poirot solving a locked-room murder",
             "price": 11.99,
             "stock": 45,
             "isbn": "978-0062693556",
@@ -158,8 +170,118 @@ def seed_books(authors, genres, publishers):
             "author_ids": [authors[4]["id"]],
             "genre_ids": [genres[2]["id"]]  # Mystery
         },
+        {
+            "title": "Foundation",
+            "description": "The first book in the Foundation series, exploring the fall and rise of galactic empires",
+            "price": 16.99,
+            "stock": 55,
+            "isbn": "978-0553293357",
+            "published_year": 1951,
+            "publisher_id": publishers[5]["id"],
+            "author_ids": [authors[5]["id"]],
+            "genre_ids": [genres[1]["id"]]  # Science Fiction
+        },
+        {
+            "title": "2001: A Space Odyssey",
+            "description": "A groundbreaking science fiction novel about space exploration and artificial intelligence",
+            "price": 17.99,
+            "stock": 38,
+            "isbn": "978-0451452084",
+            "published_year": 1968,
+            "publisher_id": publishers[1]["id"],
+            "author_ids": [authors[6]["id"]],
+            "genre_ids": [genres[1]["id"]]  # Science Fiction
+        },
+        {
+            "title": "Ubik",
+            "description": "A mind-bending science fiction novel about reality and perception",
+            "price": 14.99,
+            "stock": 42,
+            "isbn": "978-0679735779",
+            "published_year": 1969,
+            "publisher_id": publishers[2]["id"],
+            "author_ids": [authors[7]["id"]],
+            "genre_ids": [genres[1]["id"]]  # Science Fiction
+        },
+        {
+            "title": "The Left Hand of Darkness",
+            "description": "A science fiction classic exploring gender and society on an alien world",
+            "price": 15.49,
+            "stock": 48,
+            "isbn": "978-0441478522",
+            "published_year": 1969,
+            "publisher_id": publishers[6]["id"],
+            "author_ids": [authors[8]["id"]],
+            "genre_ids": [genres[1]["id"]]  # Science Fiction
+        },
+        {
+            "title": "Small Gods",
+            "description": "A fantasy comedy about belief and a small god in the Discworld universe",
+            "price": 13.99,
+            "stock": 52,
+            "isbn": "978-0552140379",
+            "published_year": 1992,
+            "publisher_id": publishers[1]["id"],
+            "author_ids": [authors[9]["id"]],
+            "genre_ids": [genres[0]["id"], genres[7]["id"]]  # Fantasy, Comedy
+        },
+        {
+            "title": "American Gods",
+            "description": "A dark fantasy novel about gods and myths in modern America",
+            "price": 19.99,
+            "stock": 37,
+            "isbn": "978-0380789023",
+            "published_year": 2001,
+            "publisher_id": publishers[3]["id"],
+            "author_ids": [authors[10]["id"]],
+            "genre_ids": [genres[0]["id"]]  # Fantasy
+        },
+        {
+            "title": "Mistborn: The Final Empire",
+            "description": "An epic fantasy about a street urchin who discovers she has magical powers",
+            "price": 18.99,
+            "stock": 44,
+            "isbn": "978-0765311789",
+            "published_year": 2006,
+            "publisher_id": publishers[4]["id"],
+            "author_ids": [authors[11]["id"]],
+            "genre_ids": [genres[0]["id"], genres[5]["id"]]  # Fantasy, Adventure
+        },
+        {
+            "title": "Harry Potter and the Chamber of Secrets",
+            "description": "The second book in the Harry Potter series with new magical challenges",
+            "price": 15.99,
+            "stock": 48,
+            "isbn": "978-0747538493",
+            "published_year": 1998,
+            "publisher_id": publishers[0]["id"],
+            "author_ids": [authors[0]["id"]],
+            "genre_ids": [genres[0]["id"]]  # Fantasy
+        },
+        {
+            "title": "The Stand",
+            "description": "A post-apocalyptic horror novel about survivors of a devastating plague",
+            "price": 19.99,
+            "stock": 33,
+            "isbn": "978-0385333313",
+            "published_year": 1978,
+            "publisher_id": publishers[2]["id"],
+            "author_ids": [authors[3]["id"]],
+            "genre_ids": [genres[4]["id"], genres[6]["id"]]  # Horror, Dystopian
+        },
+        {
+            "title": "Dune",
+            "description": "An epic science fiction novel set on a desert planet with political intrigue",
+            "price": 18.99,
+            "stock": 41,
+            "isbn": "978-0441172719",
+            "published_year": 1965,
+            "publisher_id": publishers[5]["id"],
+            "author_ids": [authors[6]["id"]],
+            "genre_ids": [genres[1]["id"]]  # Science Fiction
+        },
     ]
-    
+
     books = []
     for book_data in books_data:
         response = requests.post(f"{BASE_URL}/books", json=book_data)
@@ -168,18 +290,18 @@ def seed_books(authors, genres, publishers):
             print(f"  ✅ {book_data['title']}")
         else:
             print(f"  ❌ Failed to create {book_data['title']}: {response.text}")
-    
+
     return books
 
 
 def seed_orders(books):
     """Create test orders with items"""
     print("\n🛒 Creating orders...")
-    
+
     if len(books) < 2:
         print("  ⚠️  Skipping orders - need at least 2 books")
         return
-    
+
     # Create one order
     order_data = {
         "customer_name": "John Doe",
@@ -187,26 +309,26 @@ def seed_orders(books):
         "phone": "+1234567890",
         "status": "pending"
     }
-    
+
     response = requests.post(f"{BASE_URL}/orders", json=order_data)
     if response.status_code != 201:
         print(f"  ❌ Failed to create order: {response.text}")
         return
-    
+
     order = response.json()
     print(f"  ✅ Order #{order['id']}")
-    
+
     # Add 2 random books to order
     import random
     selected_books = random.sample(books, 2)
-    
+
     for book in selected_books:
         item_data = {
             "order_id": order["id"],
             "book_id": book["id"],
             "quantity": random.randint(1, 3)
         }
-        
+
         response = requests.post(f"{BASE_URL}/orders/items", json=item_data)
         if response.status_code == 201:
             print(f"    ✅ Added {book['title']} x{item_data['quantity']}")
@@ -217,16 +339,16 @@ def seed_orders(books):
 def main():
     """Main seed function"""
     print("🌱 Starting database seed...\n")
-    
+
     if not wait_for_api():
         sys.exit(1)
-    
+
     authors = seed_authors()
     genres = seed_genres()
     publishers = seed_publishers()
     books = seed_books(authors, genres, publishers)
     seed_orders(books)
-    
+
     print("\n✨ Seed completed!")
 
 

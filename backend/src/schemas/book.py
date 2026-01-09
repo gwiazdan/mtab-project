@@ -2,6 +2,30 @@
 from pydantic import BaseModel, Field, ConfigDict
 
 
+class AuthorResponse(BaseModel):
+    """Author response schema"""
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+
+
+class GenreResponse(BaseModel):
+    """Genre response schema"""
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+
+
+class PublisherResponse(BaseModel):
+    """Publisher response schema"""
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+
+
 class BookCreate(BaseModel):
     """Book creation schema"""
     title: str
@@ -27,3 +51,6 @@ class BookResponse(BaseModel):
     isbn: str | None = None
     published_year: int | None = None
     publisher_id: int
+    authors: list[AuthorResponse] = Field(default_factory=list)
+    genres: list[GenreResponse] = Field(default_factory=list)
+    publisher: PublisherResponse | None = None
