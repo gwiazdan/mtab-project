@@ -45,7 +45,7 @@ const Shop: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-        <div className="text-xl text-gray-400">Ładowanie książek...</div>
+        <div className="text-xl text-gray-400">Loading books...</div>
       </div>
     );
   }
@@ -53,7 +53,7 @@ const Shop: React.FC = () => {
   if (books.length === 0) {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-        <div className="text-xl text-gray-400">Brak dostępnych książek</div>
+        <div className="text-xl text-gray-400">No books available</div>
       </div>
     );
   }
@@ -83,7 +83,7 @@ const Shop: React.FC = () => {
             {/* Rating & Stock Info */}
             <div className="flex items-center justify-end mb-4">
               <span className="text-xs font-medium bg-gray-700 px-2 py-1 rounded">
-                {book.stock} w magazynie
+                {book.stock} in stock
               </span>
             </div>
 
@@ -116,7 +116,7 @@ const Shop: React.FC = () => {
                 <svg className="w-6 h-6" viewBox="0 -1.02 19.036 19.036" xmlns="http://www.w3.org/2000/svg">
                   <path d="M379.806,829.36c-.678,1.556-1.213,2.66-2.709,2.66h-8.128a2.664,2.664,0,0,1-2.71-2.66l-.316-5.346v-1.722l-2.911-2.589.7-.708,3.158,2.755h.049v2.264h15.125Zm-12.849-4.382.292,4.382a1.874,1.874,0,0,0,1.72,1.633H377.1c.9,0,1.24-.72,1.626-1.633l1.93-4.382Zm2.017,1.013h8.949v1h-8.949ZM375.952,829h-6.978v-1h6.978Zm-7.478,4a1.5,1.5,0,1,1-1.5,1.5A1.5,1.5,0,0,1,368.474,833Zm-.531,1.969h1V834h-1ZM376.474,833a1.5,1.5,0,1,1-1.5,1.5A1.5,1.5,0,0,1,376.474,833Zm-.531,1.969h1V834h-1Z" transform="translate(-363.032 -818.995)" fill="currentColor"/>
                 </svg>
-                Dodaj
+                Add
               </button>
             </div>
           </div>
@@ -131,7 +131,7 @@ const Shop: React.FC = () => {
             disabled={currentPage === 1}
             className="px-4 py-2 border border-gray-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-900 text-white transition-colors"
           >
-            ← Poprzednia
+            ← Previous
           </button>
 
           {[...Array(totalPages)].map((_, i) => {
@@ -173,7 +173,7 @@ const Shop: React.FC = () => {
             disabled={currentPage === totalPages}
             className="px-4 py-2 border border-gray-800 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-900 text-white transition-colors"
           >
-            Następna →
+            Next →
           </button>
         </div>
       )}
