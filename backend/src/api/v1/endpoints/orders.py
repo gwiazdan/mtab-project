@@ -132,9 +132,18 @@ async def bulk_update_status(data: BulkStatusUpdate, db: Session = Depends(get_d
 
 @router.delete("/bulk-delete", response_model=dict)
 async def bulk_delete(data: BulkDeleteRequest, db: Session = Depends(get_db)):
-    """Delete multiple orders"""
+    """Delete multiple orders and return items to stock"""
     if not data.order_ids:
         raise HTTPException(status_code=400, detail="No order IDs provided")
+
+    # Get all order items for the orders being deleted
+    order_items = db.query(OrderItem).filter(OrderItem.order_id.in_(data.order_ids)).all()
+
+    # Return items to stock
+    for item in order_items:
+        book = db.query(Book).filter(Book.id == item.book_id).first()
+        if book:
+            book.stock += item.quantity
 
     # Delete orders (cascade will delete order items)
     deleted_count = db.query(Order).filter(Order.id.in_(data.order_ids)).delete(
@@ -142,4 +151,4 @@ async def bulk_delete(data: BulkDeleteRequest, db: Session = Depends(get_db)):
     )
     db.commit()
 
-    return {"deleted": deleted_count}
+    return {"deleted": deleted_count, "returned_items": len(order_items)}

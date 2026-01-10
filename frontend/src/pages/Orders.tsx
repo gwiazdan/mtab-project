@@ -289,7 +289,7 @@ export const Orders: React.FC = () => {
                                   <p className="text-white font-medium">{item.book?.title || `Book #${item.book_id}`}</p>
                                   <p className="text-gray-400 text-sm">Qty: {item.quantity}</p>
                                 </div>
-                                <p className="text-white font-medium">${(item.price_at_purchase * item.quantity).toFixed(2)}</p>
+                                <p className="text-white font-medium">{(item.price_at_purchase * item.quantity).toFixed(2)} zł</p>
                               </div>
                             ))}
                           </div>
@@ -306,42 +306,56 @@ export const Orders: React.FC = () => {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-400">
-            Showing {(currentPage - 1) * itemsPerPage + 1} to{' '}
-            {Math.min(currentPage * itemsPerPage, orders.length)} of {orders.length} orders
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="px-3 py-2 bg-neutral-800 border border-gray-700 text-white rounded-lg hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
-            >
-              Previous
-            </button>
-            <div className="flex items-center gap-2">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+        <div className="flex justify-center items-center gap-2 mb-8">
+          <button
+            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+            disabled={currentPage === 1}
+            className="px-4 py-2 border border-gray-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-900 text-white transition-colors cursor-pointer"
+          >
+            ← Previous
+          </button>
+
+          {[...Array(totalPages)].map((_, i) => {
+            const page = i + 1;
+            // Show first page, last page, current page and adjacent pages
+            if (
+              page === 1 ||
+              page === totalPages ||
+              (page >= currentPage - 1 && page <= currentPage + 1)
+            ) {
+              return (
                 <button
                   key={page}
                   onClick={() => setCurrentPage(page)}
-                  className={`px-3 py-2 rounded-lg transition-colors cursor-pointer ${
-                    page === currentPage
-                      ? 'bg-white text-black font-bold'
-                      : 'bg-neutral-800 border border-gray-700 text-white hover:bg-neutral-700'
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer ${
+                    currentPage === page
+                      ? 'bg-white text-black'
+                      : 'border border-gray-700 text-white hover:bg-gray-900'
                   }`}
                 >
                   {page}
                 </button>
-              ))}
-            </div>
-            <button
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              className="px-3 py-2 bg-neutral-800 border border-gray-700 text-white rounded-lg hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
-            >
-              Next
-            </button>
-          </div>
+              );
+            } else if (
+              (page === currentPage - 2 && page > 1) ||
+              (page === currentPage + 2 && page < totalPages)
+            ) {
+              return (
+                <span key={page} className="text-gray-500">
+                  ...
+                </span>
+              );
+            }
+            return null;
+          })}
+
+          <button
+            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 border border-gray-800 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-900 text-white transition-colors cursor-pointer"
+          >
+            Next →
+          </button>
         </div>
       )}
 
