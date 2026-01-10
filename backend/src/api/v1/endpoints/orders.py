@@ -4,8 +4,20 @@ from sqlalchemy.orm import Session
 from src.core.database import get_db
 from src.models import Order, OrderItem, Book
 from src.schemas.order import OrderCreate, OrderResponse, OrderItemCreate, OrderItemResponse, OrderCreateCheckout
+from pydantic import BaseModel
 
 router = APIRouter(prefix="/orders", tags=["orders"])
+
+
+class BulkStatusUpdate(BaseModel):
+    """Bulk status update schema"""
+    order_ids: list[int]
+    status: str
+
+
+class BulkDeleteRequest(BaseModel):
+    """Bulk delete schema"""
+    order_ids: list[int]
 
 
 @router.get("/", response_model=list[OrderResponse])
@@ -98,3 +110,36 @@ async def add_order_item(item: OrderItemCreate, db: Session = Depends(get_db)):
     db.refresh(db_item)
     return db_item
 
+
+@router.put("/bulk-status", response_model=dict)
+async def bulk_update_status(data: BulkStatusUpdate, db: Session = Depends(get_db)):
+    """Update status for multiple orders"""
+    if not data.order_ids:
+        raise HTTPException(status_code=400, detail="No order IDs provided")
+
+    if data.status not in ["pending", "done"]:
+        raise HTTPException(status_code=400, detail="Invalid status. Must be 'pending' or 'done'")
+
+    # Update all orders
+    updated_count = db.query(Order).filter(Order.id.in_(data.order_ids)).update(
+        {"status": data.status},
+        synchronize_session=False
+    )
+    db.commit()
+
+    return {"updated": updated_count, "status": data.status}
+
+
+@router.delete("/bulk-delete", response_model=dict)
+async def bulk_delete(data: BulkDeleteRequest, db: Session = Depends(get_db)):
+    """Delete multiple orders"""
+    if not data.order_ids:
+        raise HTTPException(status_code=400, detail="No order IDs provided")
+
+    # Delete orders (cascade will delete order items)
+    deleted_count = db.query(Order).filter(Order.id.in_(data.order_ids)).delete(
+        synchronize_session=False
+    )
+    db.commit()
+
+    return {"deleted": deleted_count}

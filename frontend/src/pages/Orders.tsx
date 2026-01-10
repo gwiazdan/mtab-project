@@ -88,9 +88,20 @@ export const Orders: React.FC = () => {
     }
 
     try {
-      // We'll need to implement this endpoint in the backend
-      // For now, just show a placeholder
-      setError('Bulk update endpoint not yet implemented');
+      const response = await fetch('http://localhost:8000/api/v1/orders/bulk-status', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          order_ids: Array.from(selectedIds),
+          status: newStatus,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update status');
+
+      setError('');
+      setSelectedIds(new Set());
+      await fetchOrders(); // Refresh the list
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update status');
     }
@@ -108,12 +119,23 @@ export const Orders: React.FC = () => {
 
   const confirmDelete = async () => {
     try {
-      // We'll need to implement this endpoint in the backend
-      // For now, just show a placeholder
-      setError('Bulk delete endpoint not yet implemented');
+      const response = await fetch('http://localhost:8000/api/v1/orders/bulk-delete', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          order_ids: Array.from(selectedIds),
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to delete orders');
+
+      setError('');
+      setSelectedIds(new Set());
       setShowDeleteConfirm(false);
+      await fetchOrders(); // Refresh the list
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete orders');
+      setShowDeleteConfirm(false);
     }
   };
 
