@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Book } from '../types/book';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 
 interface PaginatedResponse {
   items: Book[];
@@ -18,6 +19,15 @@ const Shop: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const { addItem } = useCart();
+  const { logout } = useAuth();
+
+  // Auto-logout admin when visiting shop page
+  useEffect(() => {
+    const isAdmin = localStorage.getItem('adminSessionToken');
+    if (isAdmin) {
+      logout();
+    }
+  }, [logout]);
 
   useEffect(() => {
     const fetchBooks = async () => {

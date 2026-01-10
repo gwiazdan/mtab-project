@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Book } from '../types/book';
+import { useAuth } from './AuthContext';
 
 export interface CartItem {
   book: Book;
@@ -14,12 +15,14 @@ interface CartContextType {
   clearCart: () => void;
   total: number;
   itemCount: number;
+  isAdmin: boolean;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([]);
+  const { isAuthenticated } = useAuth();
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -39,6 +42,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [items]);
 
   const addItem = (book: Book, quantity: number = 1) => {
+    if (isAuthenticated) return; // Block when admin logged in
     setItems((prevItems) => {
       const existingItem = prevItems.find((item) => item.book.id === book.id);
 
@@ -55,10 +59,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const removeItem = (bookId: number) => {
+    if (isAuthenticated) return; // Block when admin logged in
     setItems((prevItems) => prevItems.filter((item) => item.book.id !== bookId));
   };
 
   const updateQuantity = (bookId: number, quantity: number) => {
+    if (isAuthenticated) return; // Block when admin logged in
     if (quantity <= 0) {
       removeItem(bookId);
       return;
@@ -72,6 +78,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const clearCart = () => {
+    if (isAuthenticated) return; // Block when admin logged in
     setItems([]);
   };
 
@@ -88,6 +95,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         clearCart,
         total,
         itemCount,
+        isAdmin: isAuthenticated,
       }}
     >
       {children}

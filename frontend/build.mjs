@@ -130,8 +130,21 @@ if (isDev) {
     fs.readFile(filePath, (err, content) => {
       if (err) {
         if (err.code === 'ENOENT') {
-          res.writeHead(404, { 'Content-Type': 'text/plain' });
-          res.end('404 - File not found', 'utf-8');
+          // For SPA routing - serve index.html for non-existent routes
+          if (extname === '') {
+            fs.readFile('./index.html', (errIndex, indexContent) => {
+              if (errIndex) {
+                res.writeHead(404, { 'Content-Type': 'text/plain' });
+                res.end('404 - File not found', 'utf-8');
+              } else {
+                res.writeHead(200, { 'Content-Type': 'text/html' });
+                res.end(indexContent, 'utf-8');
+              }
+            });
+          } else {
+            res.writeHead(404, { 'Content-Type': 'text/plain' });
+            res.end('404 - File not found', 'utf-8');
+          }
         } else {
           res.writeHead(500);
           res.end('Sorry, check with the site admin for error: ' + err.code + ' ..\n');

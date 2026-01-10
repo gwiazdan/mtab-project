@@ -7,8 +7,9 @@ from src.api.v1.endpoints import (
     publishers_router,
     books_router,
     orders_router,
+    admin_router,
 )
-from src.api.v1.endpoints.admin import router as admin_router
+
 api_v1_router = APIRouter()
 
 api_v1_router.include_router(health_router)

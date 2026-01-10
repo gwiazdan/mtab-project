@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from src.core.database import get_db
-from src.models.admin import Admin
+from src.models import Admin
 from src.schemas.admin import (
     AdminLoginRequest,
     AdminLoginResponse,

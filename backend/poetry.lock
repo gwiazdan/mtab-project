@@ -452,6 +452,7 @@ files = [
 
 [package.dependencies]
 annotated-types = ">=0.6.0"
+email-validator = {version = ">=2.0.0", optional = true, markers = "extra == \"email\""}
 pydantic-core = "2.41.5"
 typing-extensions = ">=4.14.1"
 typing-inspection = ">=0.4.2"
@@ -877,4 +878,4 @@ standard = ["colorama (>=0.4) ; sys_platform == \"win32\"", "httptools (>=0.6.3)
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13"
-content-hash = "e6d2f8b8cc66a3fe8e44c431b1b940f4ec04de24ab4084db6f2b7a45e07c67e4"
+content-hash = "adf288cfec80699acc58c5dab3aefbb006d8f844ad6eb880330c40de1b768ed1"
