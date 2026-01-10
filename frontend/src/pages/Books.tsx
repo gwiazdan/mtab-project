@@ -1,3 +1,4 @@
+import { fetchWithAuth } from '../api/auth';
 import React, { useState, useEffect } from 'react';
 
 interface Author {
@@ -63,7 +64,7 @@ export const Books: React.FC = () => {
 
   const fetchBooksData = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/v1/books/metadata?limit=100');
+      const response = await fetchWithAuth('/api/v1/books/metadata?limit=100');
       if (!response.ok) throw new Error('Failed to fetch books data');
       const data = await response.json();
       setBooks(data.books.items || []);
@@ -117,7 +118,7 @@ export const Books: React.FC = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/api/v1/books/', {
+      const response = await fetchWithAuth('/api/v1/books/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -181,7 +182,7 @@ export const Books: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:8000/api/v1/books/${editingBookId}`, {
+      const response = await fetchWithAuth(`/api/v1/books/${editingBookId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -233,7 +234,7 @@ export const Books: React.FC = () => {
 
   const confirmDelete = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/v1/books/bulk-delete', {
+      const response = await fetchWithAuth('/api/v1/books/bulk-delete', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

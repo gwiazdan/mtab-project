@@ -1,3 +1,4 @@
+import { fetchWithAuth } from '../api/auth';
 import React, { useState, useEffect } from 'react';
 
 export const AdminDashboard: React.FC = () => {
@@ -15,7 +16,7 @@ export const AdminDashboard: React.FC = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/v1/stats/');
+      const response = await fetchWithAuth('/api/v1/stats/');
       if (!response.ok) throw new Error('Failed to fetch stats');
 
       const data = await response.json();

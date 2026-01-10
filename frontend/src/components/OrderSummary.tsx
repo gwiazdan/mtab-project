@@ -1,3 +1,4 @@
+import { fetchWithAuth } from '../api/auth';
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import CustomerInfo, { CustomerData } from './CustomerInfo';
@@ -57,7 +58,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ isOpen, onClose }) => {
         }))
       };
 
-      const response = await fetch('http://localhost:8000/api/v1/orders/', {
+      const response = await fetchWithAuth('/api/v1/orders/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

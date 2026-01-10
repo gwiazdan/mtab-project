@@ -1,3 +1,4 @@
+import { fetchWithAuth } from '../api/auth';
 import React, { useState, useEffect } from 'react';
 
 interface Genre {
@@ -30,7 +31,7 @@ export const Genres: React.FC = () => {
 
   const fetchGenres = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/v1/genres/');
+      const response = await fetchWithAuth('/api/v1/genres/');
       if (!response.ok) throw new Error('Failed to fetch genres');
       const data = await response.json();
       setGenres(data);
@@ -81,7 +82,7 @@ export const Genres: React.FC = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/api/v1/genres/', {
+      const response = await fetchWithAuth('/api/v1/genres/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -123,7 +124,7 @@ export const Genres: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:8000/api/v1/genres/${editingGenreId}`, {
+      const response = await fetchWithAuth(`/api/v1/genres/${editingGenreId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -162,7 +163,7 @@ export const Genres: React.FC = () => {
     try {
       // Delete genres one by one since there's no bulk delete endpoint
       for (const id of selectedIds) {
-        const response = await fetch(`http://localhost:8000/api/v1/genres/${id}`, {
+        const response = await fetchWithAuth(`/api/v1/genres/${id}`, {
           method: 'DELETE',
         });
         if (!response.ok) throw new Error('Failed to delete genre');

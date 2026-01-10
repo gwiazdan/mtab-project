@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { fetchWithAuth } from '../api/auth';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -36,7 +37,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (username: string, password: string) => {
-    const response = await fetch('http://localhost:8000/api/v1/admin/login', {
+    const response = await fetchWithAuth('/api/v1/admin/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password }),
@@ -61,8 +62,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const changePassword = async (oldPassword: string, newPassword: string) => {
     if (!sessionToken) throw new Error('Not authenticated');
 
-    const response = await fetch(
-      `http://localhost:8000/api/v1/admin/change-password?token=${sessionToken}`,
+    const response = await fetchWithAuth(
+      `/api/v1/admin/change-password?token=${sessionToken}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -80,7 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     if (sessionToken) {
-      fetch(`http://localhost:8000/api/v1/admin/logout?token=${sessionToken}`, { method: 'POST' }).catch(
+      fetchWithAuth(`/api/v1/admin/logout?token=${sessionToken}`, { method: 'POST' }).catch(
         () => {}
       );
     }
@@ -93,7 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const verifyToken = async (token: string): Promise<boolean> => {
     try {
-      const response = await fetch(`http://localhost:8000/api/v1/admin/verify?token=${token}`);
+      const response = await fetchWithAuth(`/api/v1/admin/verify?token=${token}`);
       const data = await response.json();
       return data.valid === true;
     } catch {
@@ -125,3 +126,4 @@ export const useAuth = () => {
   }
   return context;
 };
+

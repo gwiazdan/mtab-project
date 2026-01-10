@@ -1,3 +1,4 @@
+import { fetchWithAuth } from '../api/auth';
 import React, { useState, useEffect } from 'react';
 
 interface OrderItem {
@@ -40,7 +41,7 @@ export const Orders: React.FC = () => {
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/v1/orders/');
+      const response = await fetchWithAuth('/api/v1/orders/');
       if (!response.ok) throw new Error('Failed to fetch orders');
       const data = await response.json();
       setOrders(data);
@@ -88,7 +89,7 @@ export const Orders: React.FC = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/api/v1/orders/bulk-status', {
+      const response = await fetchWithAuth('/api/v1/orders/bulk-status', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -119,7 +120,7 @@ export const Orders: React.FC = () => {
 
   const confirmDelete = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/v1/orders/bulk-delete', {
+      const response = await fetchWithAuth('/api/v1/orders/bulk-delete', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

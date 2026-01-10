@@ -1,3 +1,4 @@
+import { fetchWithAuth } from '../api/auth';
 import React, { useState, useEffect } from 'react';
 
 interface Author {
@@ -30,7 +31,7 @@ export const Authors: React.FC = () => {
 
   const fetchAuthors = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/v1/authors/');
+      const response = await fetchWithAuth('/api/v1/authors/');
       if (!response.ok) throw new Error('Failed to fetch authors');
       const data = await response.json();
       setAuthors(data);
@@ -81,7 +82,7 @@ export const Authors: React.FC = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/api/v1/authors/', {
+      const response = await fetchWithAuth('/api/v1/authors/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -123,7 +124,7 @@ export const Authors: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:8000/api/v1/authors/${editingAuthorId}`, {
+      const response = await fetchWithAuth(`/api/v1/authors/${editingAuthorId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -162,7 +163,7 @@ export const Authors: React.FC = () => {
     try {
       // Delete authors one by one since there's no bulk delete endpoint
       for (const id of selectedIds) {
-        const response = await fetch(`http://localhost:8000/api/v1/authors/${id}`, {
+        const response = await fetchWithAuth(`/api/v1/authors/${id}`, {
           method: 'DELETE',
         });
         if (!response.ok) throw new Error('Failed to delete author');

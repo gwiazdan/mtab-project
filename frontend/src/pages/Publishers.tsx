@@ -1,3 +1,4 @@
+import { fetchWithAuth } from '../api/auth';
 import React, { useState, useEffect } from 'react';
 
 interface Publisher {
@@ -32,7 +33,7 @@ export const Publishers: React.FC = () => {
 
   const fetchPublishers = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/v1/publishers/');
+      const response = await fetchWithAuth('/api/v1/publishers/');
       if (!response.ok) throw new Error('Failed to fetch publishers');
       const data = await response.json();
       setPublishers(data);
@@ -83,7 +84,7 @@ export const Publishers: React.FC = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/api/v1/publishers/', {
+      const response = await fetchWithAuth('/api/v1/publishers/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -127,7 +128,7 @@ export const Publishers: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:8000/api/v1/publishers/${editingPublisherId}`, {
+      const response = await fetchWithAuth(`/api/v1/publishers/${editingPublisherId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -167,7 +168,7 @@ export const Publishers: React.FC = () => {
     try {
       // Delete publishers one by one since there's no bulk delete endpoint
       for (const id of selectedIds) {
-        const response = await fetch(`http://localhost:8000/api/v1/publishers/${id}`, {
+        const response = await fetchWithAuth(`/api/v1/publishers/${id}`, {
           method: 'DELETE',
         });
         if (!response.ok) throw new Error('Failed to delete publisher');

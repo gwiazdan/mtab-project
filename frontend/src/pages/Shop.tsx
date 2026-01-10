@@ -1,3 +1,4 @@
+import { fetchWithAuth } from '../api/auth';
 import React, { useState, useEffect } from 'react';
 import { Book } from '../types/book';
 import { useCart } from '../context/CartContext';
@@ -33,8 +34,8 @@ const Shop: React.FC = () => {
     const fetchBooks = async () => {
       setLoading(true);
       try {
-        const response = await fetch(
-          `http://localhost:8000/api/v1/books/?page=${currentPage}&limit=${ITEMS_PER_PAGE}`
+        const response = await fetchWithAuth(
+          `/api/v1/books/?page=${currentPage}&limit=${ITEMS_PER_PAGE}`
         );
         const data: PaginatedResponse = await response.json();
         setBooks(data.items);

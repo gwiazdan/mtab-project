@@ -16,14 +16,24 @@ RUN npm run build
 # Production stage - nginx
 FROM nginx:alpine
 
+# Install openssl for htpasswd generation
+RUN apk add --no-cache openssl
+
 # Copy built files
 COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Copy public assets
+COPY public /usr/share/nginx/html
 
 # Copy nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose port
-EXPOSE 3000
+# Copy entrypoint script
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
-# Run nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Expose port
+EXPOSE 80
+
+# Run entrypoint script
+ENTRYPOINT ["/docker-entrypoint.sh"]
