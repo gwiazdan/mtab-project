@@ -8,6 +8,7 @@ from src.api.v1.endpoints import (
     books_router,
     orders_router,
     admin_router,
+    stats_router,
 )
 
 api_v1_router = APIRouter()
@@ -19,5 +20,6 @@ api_v1_router.include_router(publishers_router)
 api_v1_router.include_router(books_router)
 api_v1_router.include_router(orders_router)
 api_v1_router.include_router(admin_router)
+api_v1_router.include_router(stats_router)
 
 __all__ = ["api_v1_router"]
