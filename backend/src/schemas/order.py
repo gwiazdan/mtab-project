@@ -1,5 +1,6 @@
 """Order schemas"""
-from pydantic import BaseModel, Field, ConfigDict, EmailStr
+from pydantic import BaseModel, Field, ConfigDict, EmailStr, field_serializer
+from datetime import datetime
 
 
 class BookMinimal(BaseModel):
@@ -63,5 +64,14 @@ class OrderResponse(BaseModel):
     phone: str | None = None
     status: str
     total_price: float
+    created_at: datetime
     items: list[OrderItemResponse] = []
+
+    @field_serializer('created_at')
+    def serialize_created_at(self, value: datetime) -> str:
+        """Serialize datetime to ISO format with Z suffix for UTC"""
+        if value.tzinfo is None:
+            # If naive datetime, assume UTC
+            value = value.replace(tzinfo=None)
+        return value.isoformat() + 'Z'
 

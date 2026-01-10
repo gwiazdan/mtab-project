@@ -20,7 +20,7 @@ interface Order {
   status: 'pending' | 'done';
   total_price: number;
   items: OrderItem[];
-  created_at?: string;
+  created_at: string;
 }
 
 export const Orders: React.FC = () => {
@@ -249,7 +249,10 @@ export const Orders: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-gray-400 text-sm">
-                      {order.created_at ? new Date(order.created_at).toLocaleDateString() : 'N/A'}
+                      {(() => {
+                        const date = new Date(order.created_at);
+                        return date.toLocaleString('pl-PL', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+                      })()}
                     </td>
                   </tr>
                   {expandedIds.has(order.id) && (
