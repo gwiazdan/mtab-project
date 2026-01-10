@@ -1,5 +1,14 @@
 {
   "dependencies": {
     "geist": "^1.5.1"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7"
+  },
+  "lint-staged": {
+    "*.md": [
+      "echo 'Checking markdown files...'"
+    ]
   }
 }

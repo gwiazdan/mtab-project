@@ -26,8 +26,19 @@ def wait_for_api():
 
 
 def seed_authors():
-    """Create test authors"""
+    """Create test authors (idempotent)"""
     print("\n📝 Creating authors...")
+
+    # Check if authors already exist
+    try:
+        response = requests.get(f"{BASE_URL}/authors")
+        if response.status_code == 200 and len(response.json()) > 0:
+            authors = response.json()
+            print(f"  ℹ️  Found {len(authors)} existing authors, skipping seed")
+            return authors
+    except:
+        pass
+
     authors_data = [
         {"name": "J.K. Rowling", "bio": "British author, creator of Harry Potter"},
         {"name": "George R.R. Martin", "bio": "American author of A Song of Ice and Fire"},
@@ -49,6 +60,9 @@ def seed_authors():
         if response.status_code == 201:
             authors.append(response.json())
             print(f"  ✅ {author_data['name']}")
+        elif response.status_code == 409:
+            # Already exists, fetch it
+            print(f"  ℹ️  {author_data['name']} already exists")
         else:
             print(f"  ❌ Failed to create {author_data['name']}: {response.text}")
 
@@ -56,8 +70,19 @@ def seed_authors():
 
 
 def seed_genres():
-    """Create test genres"""
+    """Create test genres (idempotent)"""
     print("\n📚 Creating genres...")
+
+    # Check if genres already exist
+    try:
+        response = requests.get(f"{BASE_URL}/genres")
+        if response.status_code == 200 and len(response.json()) > 0:
+            genres = response.json()
+            print(f"  ℹ️  Found {len(genres)} existing genres, skipping seed")
+            return genres
+    except:
+        pass
+
     genres_data = [
         {"name": "Fantasy", "description": "Fantasy and magical worlds"},
         {"name": "Science Fiction", "description": "Science fiction and futuristic worlds"},
@@ -75,6 +100,8 @@ def seed_genres():
         if response.status_code == 201:
             genres.append(response.json())
             print(f"  ✅ {genre_data['name']}")
+        elif response.status_code == 409:
+            print(f"  ℹ️  {genre_data['name']} already exists")
         else:
             print(f"  ❌ Failed to create {genre_data['name']}: {response.text}")
 
@@ -82,8 +109,19 @@ def seed_genres():
 
 
 def seed_publishers():
-    """Create test publishers"""
+    """Create test publishers (idempotent)"""
     print("\n🏢 Creating publishers...")
+
+    # Check if publishers already exist
+    try:
+        response = requests.get(f"{BASE_URL}/publishers")
+        if response.status_code == 200 and len(response.json()) > 0:
+            publishers = response.json()
+            print(f"  ℹ️  Found {len(publishers)} existing publishers, skipping seed")
+            return publishers
+    except:
+        pass
+
     publishers_data = [
         {"name": "Bloomsbury Publishing", "address": "London, UK", "contact": "info@bloomsbury.com"},
         {"name": "Penguin Books", "address": "London, UK", "contact": "info@penguin.com"},
@@ -100,6 +138,8 @@ def seed_publishers():
         if response.status_code == 201:
             publishers.append(response.json())
             print(f"  ✅ {publisher_data['name']}")
+        elif response.status_code == 409:
+            print(f"  ℹ️  {publisher_data['name']} already exists")
         else:
             print(f"  ❌ Failed to create {publisher_data['name']}: {response.text}")
 
@@ -107,8 +147,20 @@ def seed_publishers():
 
 
 def seed_books(authors, genres, publishers):
-    """Create test books with relationships"""
+    """Create test books with relationships (idempotent)"""
     print("\n📖 Creating books...")
+
+    # Check if books already exist
+    try:
+        response = requests.get(f"{BASE_URL}/books")
+        if response.status_code == 200:
+            data = response.json()
+            books = data.get("items", []) if isinstance(data, dict) else data
+            if len(books) > 0:
+                print(f"  ℹ️  Found {len(books)} existing books, skipping seed")
+                return books
+    except:
+        pass
 
     if not authors or not genres or not publishers:
         print("  ⚠️  Skipping books - missing authors, genres, or publishers")
@@ -295,45 +347,51 @@ def seed_books(authors, genres, publishers):
 
 
 def seed_orders(books):
-    """Create test orders with items"""
+    """Create test orders with items (idempotent)"""
     print("\n🛒 Creating orders...")
+
+    # Check if orders already exist
+    try:
+        response = requests.get(f"{BASE_URL}/orders")
+        if response.status_code == 200 and len(response.json()) > 0:
+            print(f"  ℹ️  Found {len(response.json())} existing orders, skipping seed")
+            return
+    except:
+        pass
 
     if len(books) < 2:
         print("  ⚠️  Skipping orders - need at least 2 books")
         return
 
-    # Create one order
+    # Create one order with items using checkout flow
+    import random
+    selected_books = random.sample(books, min(2, len(books)))
+
+    # Calculate total price
+    items = []
+    total_price = 0.0
+    for book in selected_books:
+        quantity = random.randint(1, 3)
+        items.append({
+            "book_id": book["id"],
+            "quantity": quantity
+        })
+        total_price += book["price"] * quantity
+
     order_data = {
         "customer_name": "John Doe",
         "email": "john@example.com",
         "phone": "+1234567890",
-        "status": "pending"
+        "total_price": total_price,
+        "items": items
     }
 
     response = requests.post(f"{BASE_URL}/orders", json=order_data)
-    if response.status_code != 201:
+    if response.status_code == 201:
+        order = response.json()
+        print(f"  ✅ Order #{order['id']} created with {len(items)} items")
+    else:
         print(f"  ❌ Failed to create order: {response.text}")
-        return
-
-    order = response.json()
-    print(f"  ✅ Order #{order['id']}")
-
-    # Add 2 random books to order
-    import random
-    selected_books = random.sample(books, 2)
-
-    for book in selected_books:
-        item_data = {
-            "order_id": order["id"],
-            "book_id": book["id"],
-            "quantity": random.randint(1, 3)
-        }
-
-        response = requests.post(f"{BASE_URL}/orders/items", json=item_data)
-        if response.status_code == 201:
-            print(f"    ✅ Added {book['title']} x{item_data['quantity']}")
-        else:
-            print(f"    ❌ Failed to add item: {response.text}")
 
 
 def main():

@@ -48,6 +48,12 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({ isOpen, onBack, onNext }) =
     }
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSubmit();
+    }
+  };
+
   return (
     <>
       {/* Overlay blur background */}
@@ -86,6 +92,7 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({ isOpen, onBack, onNext }) =
                   onChange={(e) =>
                     setFormData({ ...formData, customer_name: e.target.value })
                   }
+                  onKeyPress={handleKeyPress}
                   className={`w-full px-4 py-2.5 rounded-lg bg-neutral-800 border transition-colors text-white placeholder-gray-500 focus:outline-none ${
                     errors.customer_name ? 'border-red-500' : 'border-gray-700 focus:border-gray-600'
                   }`}
@@ -109,6 +116,7 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({ isOpen, onBack, onNext }) =
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }
+                  onKeyPress={handleKeyPress}
                   className={`w-full px-4 py-2.5 rounded-lg bg-neutral-800 border transition-colors text-white placeholder-gray-500 focus:outline-none ${
                     errors.email ? 'border-red-500' : 'border-gray-700 focus:border-gray-600'
                   }`}
@@ -131,6 +139,7 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({ isOpen, onBack, onNext }) =
                   onChange={(e) =>
                     setFormData({ ...formData, phone: e.target.value })
                   }
+                  onKeyPress={handleKeyPress}
                   className={`w-full px-4 py-2.5 rounded-lg bg-neutral-800 border transition-colors text-white placeholder-gray-500 focus:outline-none ${
                     errors.phone ? 'border-red-500' : 'border-gray-700 focus:border-gray-600'
                   }`}

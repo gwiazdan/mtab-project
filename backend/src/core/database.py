@@ -30,4 +30,24 @@ def get_db() -> Generator:
 def create_tables():
     """Create all tables in the database"""
     DB_DIR.mkdir(exist_ok=True)
+
+    # Import all models BEFORE creating tables to register them with Base
+    from src.models.admin import Admin
+
     Base.metadata.create_all(bind=engine)
+
+    # Create default admin user if not exists
+    db = SessionLocal()
+    try:
+        admin = db.query(Admin).filter(Admin.username == "admin").first()
+        if not admin:
+            admin = Admin(
+                username="admin",
+                requires_password_change=True
+            )
+            admin.set_password("admin")
+            db.add(admin)
+            db.commit()
+            print("✅ Default admin user created (u:admin p:admin)")
+    finally:
+        db.close()
