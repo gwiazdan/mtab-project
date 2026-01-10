@@ -32,3 +32,27 @@ async def create_genre(genre: GenreCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_genre)
     return db_genre
+
+
+@router.put("/{genre_id}", response_model=GenreResponse)
+async def update_genre(genre_id: int, genre: GenreCreate, db: Session = Depends(get_db)):
+    """Update a genre"""
+    db_genre = db.query(Genre).filter(Genre.id == genre_id).first()
+    if not db_genre:
+        raise HTTPException(status_code=404, detail="Genre not found")
+    db_genre.name = genre.name
+    db_genre.description = genre.description
+    db.commit()
+    db.refresh(db_genre)
+    return db_genre
+
+
+@router.delete("/{genre_id}", status_code=204)
+async def delete_genre(genre_id: int, db: Session = Depends(get_db)):
+    """Delete a genre"""
+    db_genre = db.query(Genre).filter(Genre.id == genre_id).first()
+    if not db_genre:
+        raise HTTPException(status_code=404, detail="Genre not found")
+    db.delete(db_genre)
+    db.commit()
+    return None

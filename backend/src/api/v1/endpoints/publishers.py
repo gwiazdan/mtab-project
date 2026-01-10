@@ -36,3 +36,28 @@ async def create_publisher(publisher: PublisherCreate, db: Session = Depends(get
     db.commit()
     db.refresh(db_publisher)
     return db_publisher
+
+
+@router.put("/{publisher_id}", response_model=PublisherResponse)
+async def update_publisher(publisher_id: int, publisher: PublisherCreate, db: Session = Depends(get_db)):
+    """Update a publisher"""
+    db_publisher = db.query(Publisher).filter(Publisher.id == publisher_id).first()
+    if not db_publisher:
+        raise HTTPException(status_code=404, detail="Publisher not found")
+    db_publisher.name = publisher.name
+    db_publisher.address = publisher.address
+    db_publisher.contact = publisher.contact
+    db.commit()
+    db.refresh(db_publisher)
+    return db_publisher
+
+
+@router.delete("/{publisher_id}", status_code=204)
+async def delete_publisher(publisher_id: int, db: Session = Depends(get_db)):
+    """Delete a publisher"""
+    db_publisher = db.query(Publisher).filter(Publisher.id == publisher_id).first()
+    if not db_publisher:
+        raise HTTPException(status_code=404, detail="Publisher not found")
+    db.delete(db_publisher)
+    db.commit()
+    return None

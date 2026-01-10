@@ -32,3 +32,27 @@ async def create_author(author: AuthorCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_author)
     return db_author
+
+
+@router.put("/{author_id}", response_model=AuthorResponse)
+async def update_author(author_id: int, author: AuthorCreate, db: Session = Depends(get_db)):
+    """Update an author"""
+    db_author = db.query(Author).filter(Author.id == author_id).first()
+    if not db_author:
+        raise HTTPException(status_code=404, detail="Author not found")
+    db_author.name = author.name
+    db_author.bio = author.bio
+    db.commit()
+    db.refresh(db_author)
+    return db_author
+
+
+@router.delete("/{author_id}", status_code=204)
+async def delete_author(author_id: int, db: Session = Depends(get_db)):
+    """Delete an author"""
+    db_author = db.query(Author).filter(Author.id == author_id).first()
+    if not db_author:
+        raise HTTPException(status_code=404, detail="Author not found")
+    db.delete(db_author)
+    db.commit()
+    return None

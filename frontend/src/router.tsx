@@ -5,6 +5,9 @@ import { Login } from './pages/Login';
 import { Admin } from './pages/Admin';
 import { Orders } from './pages/Orders';
 import { Books } from './pages/Books';
+import { Authors } from './pages/Authors';
+import { Genres } from './pages/Genres';
+import { Publishers } from './pages/Publishers';
 import { useAuth } from './context/AuthContext';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -20,6 +23,9 @@ const router = (
         <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
         <Route path="/admin/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
         <Route path="/admin/books" element={<ProtectedRoute><Books /></ProtectedRoute>} />
+        <Route path="/admin/authors" element={<ProtectedRoute><Authors /></ProtectedRoute>} />
+        <Route path="/admin/genres" element={<ProtectedRoute><Genres /></ProtectedRoute>} />
+        <Route path="/admin/publishers" element={<ProtectedRoute><Publishers /></ProtectedRoute>} />
         <Route path="/" element={<Shop />} />
       </Route>
       {/* Fallback for unknown routes */}
