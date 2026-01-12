@@ -18,8 +18,19 @@
 
 **Description:** Layer responsible for data storage. The database will be based on SQLite technology, which is a very minimalist database, ideal for this project.
 
-### 4. Infrastructure and Deployment
+### 4. Reverse Proxy Layer
 
-**Technology:** Git, Docker
+**Technology:** Nginx
 
-**Description:** Git will be used for version control, while Docker will be used to containerize the individual application layers.
+**Description:** Nginx serves as a reverse proxy and web server, handling:
+- Routing requests to the appropriate backend (React frontend or FastAPI API)
+- Serving static files efficiently
+- SSL/TLS termination (when configured)
+- Request forwarding to containerized services
+- Single entry point for the application (port 80)
+
+### 5. Infrastructure and Deployment
+
+**Technology:** Git, Docker, Docker Compose
+
+**Description:** Git is used for version control. Docker containerizes the frontend (React), backend (FastAPI), and reverse proxy (Nginx). Docker Compose orchestrates all containers in development and production environments.
