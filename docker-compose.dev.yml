@@ -14,11 +14,9 @@ services:
   backend:
     build:
       context: ./backend
-    volumes:
-      - ./backend:/app
+      dockerfile: Dockerfile
     environment:
       - BACKEND_PORT=8000
-    command: poetry run python main.py
     networks:
       - mtab-network
 
@@ -33,11 +31,3 @@ services:
       - backend
     networks:
       - mtab-network
-
-volumes:
-  db:
-    driver: local
-
-networks:
-  mtab-network:
-    driver: bridge

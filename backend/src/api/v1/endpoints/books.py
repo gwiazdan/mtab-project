@@ -73,11 +73,45 @@ async def get_books_metadata(
 async def list_books(
     page: int = Query(1, ge=1),
     limit: int = Query(12, ge=1, le=100),
+    search: str = Query(None),
+    genre_ids: list[int] = Query(None),
+    author_ids: list[int] = Query(None),
+    publisher_ids: list[int] = Query(None),
+    min_price: float = Query(None),
+    max_price: float = Query(None),
     db: Session = Depends(get_db)
 ):
-    """Get all books with stock > 0, paginated"""
+    """Get all books with stock > 0, paginated with optional search and filters"""
     # Query books with stock > 0
     query = db.query(Book).filter(Book.stock > 0)
+
+    # Apply search filter - searches in title and description (case-insensitive)
+    if search:
+        search_lower = search.lower()
+        # Search by title starting with OR containing any word
+        query = query.filter(
+            (Book.title.ilike(f"{search_lower}%")) |  # Starts with
+            (Book.title.ilike(f"% {search_lower}%")) |  # Contains as separate word
+            (Book.description.ilike(f"%{search_lower}%"))  # Anywhere in description
+        )
+
+    # Apply genre filter (multiple)
+    if genre_ids:
+        query = query.join(Book.genres).filter(Genre.id.in_(genre_ids))
+
+    # Apply author filter (multiple)
+    if author_ids:
+        query = query.join(Book.authors).filter(Author.id.in_(author_ids))
+
+    # Apply publisher filter
+    if publisher_ids:
+        query = query.filter(Book.publisher_id.in_(publisher_ids))
+
+    # Apply price range filters
+    if min_price is not None:
+        query = query.filter(Book.price >= min_price)
+    if max_price is not None:
+        query = query.filter(Book.price <= max_price)
 
     # Get total count
     total = query.count()

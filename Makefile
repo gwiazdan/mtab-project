@@ -2,17 +2,12 @@
 
 help:
 	@echo "Available commands:"
-	@echo "  make dev       - Run development environment (with hot-reload)"
-	@echo "  make prod      - Run production environment"
-	@echo "  make build     - Build Docker images"
-	@echo "  make down      - Stop all containers"
-	@echo "  make logs      - Show container logs"
-	@echo "  make clean     - Remove containers and volumes"
-	@echo "  make clean-images - Remove built Docker images"
-
-dev:
-	docker-compose -f docker-compose.dev.yml build
-	docker-compose -f docker-compose.dev.yml up
+	@echo "  make prod           - Run production environment"
+	@echo "  make build          - Build Docker images"
+	@echo "  make down           - Stop all containers"
+	@echo "  make logs           - Show container logs"
+	@echo "  make clean          - Remove containers and volumes"
+	@echo "  make clean-images   - Remove built Docker images"
 
 prod:
 	docker-compose build
@@ -29,7 +24,7 @@ logs:
 
 clean:
 	docker-compose down -v
-	docker-compose -f docker-compose.dev.yml down -v
 
 clean-images:
-	docker image rm mtab-project-backend mtab-project-nginx 2>/dev/null || true
+	docker image rm mtab-project-backend mtab-project-frontend 2>/dev/null || true
+	docker image prune -f

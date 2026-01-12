@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Book } from '../types/book';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import PriceRangeSlider from '../components/PriceRangeSlider';
+import LoadingScreen from '../components/LoadingScreen';
 
 interface PaginatedResponse {
   items: Book[];
@@ -12,16 +14,48 @@ interface PaginatedResponse {
   pages: number;
 }
 
+interface Genre {
+  id: number;
+  name: string;
+}
+
+interface Author {
+  id: number;
+  name: string;
+}
+
+interface Publisher {
+  id: number;
+  name: string;
+}
+
 const ITEMS_PER_PAGE = 12;
 
 const Shop: React.FC = () => {
   const [books, setBooks] = useState<Book[]>([]);
+  const [genres, setGenres] = useState<Genre[]>([]);
+  const [authors, setAuthors] = useState<Author[]>([]);
+  const [publishers, setPublishers] = useState<Publisher[]>([]);
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedGenres, setSelectedGenres] = useState<number[]>([]);
+  const [selectedAuthors, setSelectedAuthors] = useState<number[]>([]);
+  const [selectedPublishers, setSelectedPublishers] = useState<number[]>([]);
+  const [minPrice, setMinPrice] = useState<number | null>(null);
+  const [maxPrice, setMaxPrice] = useState<number | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [expandedGenres, setExpandedGenres] = useState(false);
+  const [expandedAuthors, setExpandedAuthors] = useState(false);
+  const [expandedPublishers, setExpandedPublishers] = useState(false);
+  const [expandedPrice, setExpandedPrice] = useState(false);
   const { addItem } = useCart();
   const { logout } = useAuth();
+
+  // Check if any filters are active
+  const hasActiveFilters = searchQuery || selectedGenres.length > 0 || selectedAuthors.length > 0 || selectedPublishers.length > 0 || minPrice !== null || maxPrice !== null;
 
   // Auto-logout admin when visiting shop page
   useEffect(() => {
@@ -31,12 +65,57 @@ const Shop: React.FC = () => {
     }
   }, [logout]);
 
+  // Fetch genres, authors, publishers on mount
+  useEffect(() => {
+    const fetchMetadata = async () => {
+      try {
+        const [genresRes, authorsRes, publishersRes] = await Promise.all([
+          fetchWithAuth('/api/v1/genres/'),
+          fetchWithAuth('/api/v1/authors/'),
+          fetchWithAuth('/api/v1/publishers/'),
+        ]);
+        setGenres(await genresRes.json());
+        setAuthors(await authorsRes.json());
+        setPublishers(await publishersRes.json());
+      } catch (error) {
+        console.error('Error fetching metadata:', error);
+      }
+    };
+
+    fetchMetadata();
+  }, []);
+
+  // Listen for search updates from navbar
+  useEffect(() => {
+    const handleSearch = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      setSearchQuery(customEvent.detail);
+      setCurrentPage(1); // Reset to first page on search
+    };
+
+    window.addEventListener('searchUpdate', handleSearch);
+    return () => window.removeEventListener('searchUpdate', handleSearch);
+  }, []);
+
   useEffect(() => {
     const fetchBooks = async () => {
       setLoading(true);
       try {
+        // Build query parameters
+        const params = new URLSearchParams({
+          page: currentPage.toString(),
+          limit: ITEMS_PER_PAGE.toString(),
+        });
+
+        if (searchQuery) params.append('search', searchQuery);
+        selectedGenres.forEach(id => params.append('genre_ids', id.toString()));
+        selectedAuthors.forEach(id => params.append('author_ids', id.toString()));
+        selectedPublishers.forEach(id => params.append('publisher_ids', id.toString()));
+        if (minPrice !== null) params.append('min_price', minPrice.toString());
+        if (maxPrice !== null) params.append('max_price', maxPrice.toString());
+
         const response = await fetchWithAuth(
-          `/api/v1/books/?page=${currentPage}&limit=${ITEMS_PER_PAGE}`
+          `/api/v1/books/?${params.toString()}`
         );
         const data: PaginatedResponse = await response.json();
         setBooks(data.items);
@@ -49,34 +128,209 @@ const Shop: React.FC = () => {
     };
 
     fetchBooks();
-  }, [currentPage]);
+  }, [currentPage, searchQuery, selectedGenres, selectedAuthors, selectedPublishers, minPrice, maxPrice]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-        <div className="text-xl text-gray-400">Loading books...</div>
-      </div>
-    );
-  }
-
-  if (books.length === 0) {
-    return (
-      <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-        <div className="text-xl text-gray-400">No books available</div>
-      </div>
-    );
-  }
-
   return (
     <>
-      {/* Books Grid */}
-      <div key={currentPage} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12 fade-in">
-        {books.map((book) => (
+      {/* Filters Section - Header always visible */}
+      <div className="mb-8 bg-neutral-900 border border-gray-800 rounded-lg overflow-hidden">
+        <button
+          onClick={() => setShowFilters(!showFilters)}
+          className="w-full px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-neutral-800 transition-colors"
+        >
+          <h3 className="text-lg font-semibold text-white">Filters</h3>
+          <div className="flex items-center gap-2">
+            {(selectedGenres.length > 0 || selectedAuthors.length > 0 || selectedPublishers.length > 0 || minPrice !== null || maxPrice !== null) && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedGenres([]);
+                  setSelectedAuthors([]);
+                  setSelectedPublishers([]);
+                  setMinPrice(null);
+                  setMaxPrice(null);
+                  setCurrentPage(1);
+                }}
+                className="text-xs uppercase tracking-wider hover:text-gray-300 transition-colors"
+              >
+                Clear all
+              </button>
+            )}
+            <svg className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${showFilters ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 9l6 6 6-6" />
+            </svg>
+          </div>
+        </button>
+
+        {showFilters && (
+          <div className="p-4 pt-0 space-y-1.5">
+              {/* Genres Section */}
+              <div className="border-b border-gray-700">
+                <button
+                  onClick={() => setExpandedGenres(!expandedGenres)}
+                  className="w-full px-3 py-2 flex items-center justify-between cursor-pointer hover:bg-neutral-800 transition-colors"
+                >
+                  <span className="text-sm text-gray-300">Category</span>
+                  <svg className={`w-4 h-4 text-gray-400 transition-transform duration-300 ${expandedGenres ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 9l6 6 6-6" />
+                  </svg>
+                </button>
+                {expandedGenres && (
+                  <div className="px-3 py-2 bg-neutral-800 space-y-1.5 max-h-48 overflow-y-auto">
+                    {genres.map((genre) => {
+                        const count = books.filter(b => b.genres.some(g => g.id === genre.id)).length;
+                        return (
+                          <label key={genre.id} className="flex items-center gap-2 cursor-pointer text-sm py-1">
+                            <input
+                              type="checkbox"
+                              checked={selectedGenres.includes(genre.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedGenres([...selectedGenres, genre.id]);
+                                } else {
+                                  setSelectedGenres(selectedGenres.filter(id => id !== genre.id));
+                                }
+                                setCurrentPage(1);
+                              }}
+                              className="w-4 h-4 bg-neutral-700 border border-gray-600 rounded accent-blue-500 cursor-pointer"
+                            />
+                            <span className="text-gray-300 flex-1">{genre.name}</span>
+                            <span className="text-xs text-gray-500">({count})</span>
+                          </label>
+                        );
+                      })}
+                  </div>
+                )}
+              </div>
+
+              {/* Authors Section */}
+              <div className="border-b border-gray-700">
+                <button
+                  onClick={() => setExpandedAuthors(!expandedAuthors)}
+                  className="w-full px-3 py-2 flex items-center justify-between cursor-pointer hover:bg-neutral-800 transition-colors"
+                >
+                  <span className="text-sm text-gray-300">Author</span>
+                  <svg className={`w-4 h-4 text-gray-400 transition-transform duration-300 ${expandedAuthors ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 9l6 6 6-6" />
+                  </svg>
+                </button>
+                {expandedAuthors && (
+                  <div className="px-3 py-2 bg-neutral-800 space-y-1.5 max-h-48 overflow-y-auto">
+                    {authors.map((author) => {
+                        const count = books.filter(b => b.authors.some(a => a.id === author.id)).length;
+                        return (
+                          <label key={author.id} className="flex items-center gap-2 cursor-pointer text-sm py-1">
+                            <input
+                              type="checkbox"
+                              checked={selectedAuthors.includes(author.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedAuthors([...selectedAuthors, author.id]);
+                                } else {
+                                  setSelectedAuthors(selectedAuthors.filter(id => id !== author.id));
+                                }
+                                setCurrentPage(1);
+                              }}
+                              className="w-4 h-4 bg-neutral-700 border border-gray-600 rounded accent-blue-500 cursor-pointer"
+                            />
+                            <span className="text-gray-300 flex-1">{author.name}</span>
+                            <span className="text-xs text-gray-500">({count})</span>
+                          </label>
+                        );
+                      })}
+                  </div>
+                )}
+              </div>
+
+              {/* Publishers Section */}
+              <div className="border-b border-gray-700">
+                <button
+                  onClick={() => setExpandedPublishers(!expandedPublishers)}
+                  className="w-full px-3 py-2 flex items-center justify-between cursor-pointer hover:bg-neutral-800 transition-colors"
+                >
+                  <span className="text-sm text-gray-300">Publisher</span>
+                  <svg className={`w-4 h-4 text-gray-400 transition-transform duration-300 ${expandedPublishers ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 9l6 6 6-6" />
+                  </svg>
+                </button>
+                {expandedPublishers && (
+                  <div className="px-3 py-2 bg-neutral-800 space-y-1.5 max-h-48 overflow-y-auto">
+                    {publishers.map((publisher) => {
+                        const count = books.filter(b => b.publisher.id === publisher.id).length;
+                        return (
+                          <label key={publisher.id} className="flex items-center gap-2 cursor-pointer text-sm py-1">
+                            <input
+                              type="checkbox"
+                              checked={selectedPublishers.includes(publisher.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedPublishers([...selectedPublishers, publisher.id]);
+                                } else {
+                                  setSelectedPublishers(selectedPublishers.filter(id => id !== publisher.id));
+                                }
+                                setCurrentPage(1);
+                              }}
+                              className="w-4 h-4 bg-neutral-700 border border-gray-600 rounded accent-blue-500 cursor-pointer"
+                            />
+                            <span className="text-gray-300 flex-1">{publisher.name}</span>
+                            <span className="text-xs text-gray-500">({count})</span>
+                          </label>
+                        );
+                      })}
+                  </div>
+                )}
+              </div>
+
+              {/* Price Section */}
+              <div className="border-b border-gray-700">
+                <button
+                  onClick={() => setExpandedPrice(!expandedPrice)}
+                  className="w-full px-3 py-2 flex items-center justify-between cursor-pointer hover:bg-neutral-800 transition-colors"
+                >
+                  <span className="text-sm text-gray-300">Price</span>
+                  <svg className={`w-4 h-4 text-gray-400 transition-transform duration-300 ${expandedPrice ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 9l6 6 6-6" />
+                  </svg>
+                </button>
+                {expandedPrice && (
+                  <div className="px-3 py-3 bg-neutral-800">
+                    <PriceRangeSlider
+                      minPrice={minPrice}
+                      maxPrice={maxPrice}
+                      onChange={(min, max) => {
+                        setMinPrice(min);
+                        setMaxPrice(max);
+                        setCurrentPage(1);
+                      }}
+                      minBound={0}
+                      maxBound={1000}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+      {/* Loading state */}
+      {loading && <LoadingScreen />}
+
+      {/* No books message */}
+      {!loading && books.length === 0 && (
+        <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
+          <div className="text-xl text-gray-400">No books available</div>
+        </div>
+      )}
+
+      {/* Books Grid - Only shown when there are books */}
+      {!loading && books.length > 0 && (
+        <div key={currentPage} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12 fade-in">
+          {books.map((book) => (
           <div
             key={book.id}
             onClick={() => setSelectedBook(book)}
@@ -140,10 +394,11 @@ const Shop: React.FC = () => {
             </div>
           </div>
         ))}
-      </div>
+        </div>
+      )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {!loading && books.length > 0 && totalPages > 1 && (
         <div className="flex justify-center items-center gap-2 mb-8">
           <button
             onClick={() => handlePageChange(Math.max(1, currentPage - 1))}

@@ -10,29 +10,5 @@
   <body class="antialiased">
     <div id="root"></div>
     <script src="/bundle.js"></script>
-    <script>
-      // Hot reload WebSocket
-      (function setupHotReload() {
-        const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const ws = new WebSocket(protocol + '//' + location.host);
-        ws.onmessage = (e) => {
-          console.log('HMR message received:', e.data);
-          if (e.data === 'reload') {
-            console.log('Reloading page...');
-            location.reload();
-          }
-        };
-        ws.onerror = (err) => {
-          console.error('Hot reload connection error:', err);
-        };
-        ws.onclose = () => {
-          console.log('Hot reload disconnected, retrying in 3s...');
-          setTimeout(setupHotReload, 3000);
-        };
-        ws.onopen = () => {
-          console.log('Hot reload connected!');
-        };
-      })();
-    </script>
   </body>
 </html>
