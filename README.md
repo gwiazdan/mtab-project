@@ -28,7 +28,7 @@ docker-compose up
 
 # Admin panel available at http://localhost/admin
 # Login credentials:
-# y: admin p: admin
+# u: admin p: admin
 # Password change gui will pop up after the first login
 
 ```
