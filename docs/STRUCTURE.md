@@ -10,7 +10,6 @@ mtab-project/
 │  │  ├─ models/              # SQLAlchemy database models
 │  │  ├─ schemas/             # Pydantic validation schemas
 │  │  ├─ core/                # Config and database setup
-│  │  └─ services/            # Business logic (optional)
 │  ├─ tests/                  # Backend tests
 │  ├─ main.py                 # FastAPI app entry point
 │  ├─ Dockerfile              # Backend container configuration
