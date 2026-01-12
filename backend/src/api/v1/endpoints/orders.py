@@ -40,7 +40,6 @@ async def get_order(order_id: int, db: Session = Depends(get_db)):
 async def create_order_checkout(order: OrderCreateCheckout, db: Session = Depends(get_db)):
     """Create a new order with items (checkout flow)"""
 
-    # Validate all books exist and have sufficient stock
     books_data = {}
 
     for item in order.items:
@@ -57,18 +56,18 @@ async def create_order_checkout(order: OrderCreateCheckout, db: Session = Depend
             )
         books_data[item.book_id] = (book, item.quantity)
 
-    # Create order with total_price from frontend (includes VAT + shipping)
     db_order = Order(
         customer_name=order.customer_name,
         email=order.email,
         phone=order.phone,
+        address=order.address,
+        postal_code=order.postal_code,
         status="pending",
         total_price=order.total_price
     )
     db.add(db_order)
-    db.flush()  # Get order ID without committing
+    db.flush()
 
-    # Create order items and reduce stock
     for book_id, (book, quantity) in books_data.items():
         db_item = OrderItem(
             order_id=db_order.id,
@@ -120,7 +119,6 @@ async def bulk_update_status(data: BulkStatusUpdate, db: Session = Depends(get_d
     if data.status not in ["pending", "done"]:
         raise HTTPException(status_code=400, detail="Invalid status. Must be 'pending' or 'done'")
 
-    # Update all orders
     updated_count = db.query(Order).filter(Order.id.in_(data.order_ids)).update(
         {"status": data.status},
         synchronize_session=False
@@ -136,16 +134,13 @@ async def bulk_delete(data: BulkDeleteRequest, db: Session = Depends(get_db)):
     if not data.order_ids:
         raise HTTPException(status_code=400, detail="No order IDs provided")
 
-    # Get all order items for the orders being deleted
     order_items = db.query(OrderItem).filter(OrderItem.order_id.in_(data.order_ids)).all()
 
-    # Return items to stock
     for item in order_items:
         book = db.query(Book).filter(Book.id == item.book_id).first()
         if book:
             book.stock += item.quantity
 
-    # Delete orders (cascade will delete order items)
     deleted_count = db.query(Order).filter(Order.id.in_(data.order_ids)).delete(
         synchronize_session=False
     )

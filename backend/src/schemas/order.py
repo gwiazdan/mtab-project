@@ -42,6 +42,8 @@ class OrderCreateCheckout(BaseModel):
     customer_name: str = Field(min_length=1, max_length=255)
     email: EmailStr
     phone: str | None = Field(None, max_length=20)
+    address: str = Field(min_length=1, max_length=255)
+    postal_code: str = Field(min_length=1, max_length=20)
     total_price: float = Field(gt=0)
     items: list[OrderItemCheckout] = Field(min_length=1)
 
@@ -51,6 +53,8 @@ class OrderCreate(BaseModel):
     customer_name: str
     email: str
     phone: str | None = None
+    address: str
+    postal_code: str
     status: str = "pending"
 
 
@@ -62,6 +66,8 @@ class OrderResponse(BaseModel):
     customer_name: str
     email: str
     phone: str | None = None
+    address: str
+    postal_code: str
     status: str
     total_price: float
     created_at: datetime

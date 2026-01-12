@@ -41,7 +41,6 @@ async def get_books_metadata(
     db: Session = Depends(get_db)
 ):
     """Get all books with all metadata in one request (admin panel - no stock filter)"""
-    # Get paginated books - NO stock filter for admin panel
     query = db.query(Book)
     total = query.count()
     offset = (page - 1) * limit
@@ -82,45 +81,35 @@ async def list_books(
     db: Session = Depends(get_db)
 ):
     """Get all books with stock > 0, paginated with optional search and filters"""
-    # Query books with stock > 0
     query = db.query(Book).filter(Book.stock > 0)
 
-    # Apply search filter - searches in title and description (case-insensitive)
     if search:
         search_lower = search.lower()
-        # Search by title starting with OR containing any word
         query = query.filter(
-            (Book.title.ilike(f"{search_lower}%")) |  # Starts with
-            (Book.title.ilike(f"% {search_lower}%")) |  # Contains as separate word
-            (Book.description.ilike(f"%{search_lower}%"))  # Anywhere in description
+            (Book.title.ilike(f"{search_lower}%")) |
+            (Book.title.ilike(f"% {search_lower}%")) |
+            (Book.description.ilike(f"%{search_lower}%"))
         )
 
-    # Apply genre filter (multiple)
     if genre_ids:
         query = query.join(Book.genres).filter(Genre.id.in_(genre_ids))
 
-    # Apply author filter (multiple)
     if author_ids:
         query = query.join(Book.authors).filter(Author.id.in_(author_ids))
 
-    # Apply publisher filter
     if publisher_ids:
         query = query.filter(Book.publisher_id.in_(publisher_ids))
 
-    # Apply price range filters
     if min_price is not None:
         query = query.filter(Book.price >= min_price)
     if max_price is not None:
         query = query.filter(Book.price <= max_price)
 
-    # Get total count
-    total = query.count()
+    total = query.distinct().count()
 
-    # Calculate pagination
     offset = (page - 1) * limit
-    books = query.offset(offset).limit(limit).all()
+    books = query.distinct().offset(offset).limit(limit).all()
 
-    # Calculate total pages
     pages = (total + limit - 1) // limit
 
     return {

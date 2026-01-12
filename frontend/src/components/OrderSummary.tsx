@@ -51,6 +51,8 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ isOpen, onClose }) => {
         customer_name: customerData.customer_name,
         email: customerData.email,
         phone: customerData.phone,
+        address: customerData.address,
+        postal_code: customerData.postal_code,
         total_price: finalTotal,
         items: items.map(item => ({
           book_id: item.book.id,

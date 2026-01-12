@@ -10,6 +10,8 @@ export interface CustomerData {
   customer_name: string;
   email: string;
   phone: string;
+  address: string;
+  postal_code: string;
 }
 
 const CustomerInfo: React.FC<CustomerInfoProps> = ({ isOpen, onBack, onNext }) => {
@@ -17,6 +19,8 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({ isOpen, onBack, onNext }) =
     customer_name: '',
     email: '',
     phone: '',
+    address: '',
+    postal_code: '',
   });
 
   const [errors, setErrors] = useState<Partial<CustomerData>>({});
@@ -36,6 +40,12 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({ isOpen, onBack, onNext }) =
     }
     if (!formData.phone.trim()) {
       newErrors.phone = 'Phone is required';
+    }
+    if (!formData.address.trim()) {
+      newErrors.address = 'Address is required';
+    }
+    if (!formData.postal_code.trim()) {
+      newErrors.postal_code = 'Postal code is required';
     }
 
     setErrors(newErrors);
@@ -147,6 +157,52 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({ isOpen, onBack, onNext }) =
                 />
                 {errors.phone && (
                   <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+                )}
+              </div>
+
+              {/* Address */}
+              <div>
+                <label htmlFor="address" className="block text-sm font-medium text-white mb-2">
+                  Street Address *
+                </label>
+                <input
+                  type="text"
+                  id="address"
+                  value={formData.address}
+                  onChange={(e) =>
+                    setFormData({ ...formData, address: e.target.value })
+                  }
+                  onKeyPress={handleKeyPress}
+                  className={`w-full px-4 py-2.5 rounded-lg bg-neutral-800 border transition-colors text-white placeholder-gray-500 focus:outline-none ${
+                    errors.address ? 'border-red-500' : 'border-gray-700 focus:border-gray-600'
+                  }`}
+                  placeholder="123 Main Street, Apt 4B"
+                />
+                {errors.address && (
+                  <p className="text-red-500 text-xs mt-1">{errors.address}</p>
+                )}
+              </div>
+
+              {/* Postal Code */}
+              <div>
+                <label htmlFor="postal_code" className="block text-sm font-medium text-white mb-2">
+                  Postal Code *
+                </label>
+                <input
+                  type="text"
+                  id="postal_code"
+                  value={formData.postal_code}
+                  onChange={(e) =>
+                    setFormData({ ...formData, postal_code: e.target.value })
+                  }
+                  onKeyPress={handleKeyPress}
+                  className={`w-full px-4 py-2.5 rounded-lg bg-neutral-800 border transition-colors text-white placeholder-gray-500 focus:outline-none ${
+                    errors.postal_code ? 'border-red-500' : 'border-gray-700 focus:border-gray-600'
+                  }`}
+                  placeholder="10001"
+                />
+                {errors.postal_code && (
+                  <p className="text-red-500 text-xs mt-1">{errors.postal_code}</p>
                 )}
               </div>
             </div>

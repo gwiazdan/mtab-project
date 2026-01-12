@@ -11,6 +11,8 @@ class Order(Base):
     customer_name = Column(String(255), nullable=False)
     email = Column(String(255), nullable=False)
     phone = Column(String(20), nullable=True)
+    address = Column(String(255), nullable=False)
+    postal_code = Column(String(20), nullable=False)
     status = Column(String(50), default="pending")
     total_price = Column(Float, nullable=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

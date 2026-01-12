@@ -382,6 +382,8 @@ def seed_orders(books):
         "customer_name": "John Doe",
         "email": "john@example.com",
         "phone": "+1234567890",
+        "address": "123 Main Street, Apt 4B",
+        "postal_code": "10001",
         "total_price": total_price,
         "items": items
     }

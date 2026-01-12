@@ -18,6 +18,8 @@ interface Order {
   customer_name: string;
   email: string;
   phone: string | null;
+  address: string;
+  postal_code: string;
   status: 'pending' | 'done';
   total_price: number;
   items: OrderItem[];
@@ -281,18 +283,33 @@ export const Orders: React.FC = () => {
                   {expandedIds.has(order.id) && (
                     <tr className="bg-neutral-700">
                       <td colSpan={8} className="px-6 py-4">
-                        <div className="space-y-2">
-                          <h4 className="text-white font-semibold text-sm mb-3">Order Items:</h4>
-                          <div className="space-y-2">
-                            {order.items.map((item, idx) => (
-                              <div key={idx} className="bg-neutral-800 p-3 rounded border border-gray-700 flex justify-between items-center">
-                                <div>
-                                  <p className="text-white font-medium">{item.book?.title || `Book #${item.book_id}`}</p>
-                                  <p className="text-gray-400 text-sm">Qty: {item.quantity}</p>
+                        <div className="space-y-4">
+                          {/* Customer Info */}
+                          <div>
+                            <h4 className="text-white font-semibold text-sm mb-2">Delivery Address:</h4>
+                            <div className="bg-neutral-800 p-3 rounded border border-gray-700 space-y-1">
+                              <p className="text-white">{order.customer_name}</p>
+                              <p className="text-gray-400 text-sm">{order.address}</p>
+                              <p className="text-gray-400 text-sm">{order.postal_code}</p>
+                              <p className="text-gray-400 text-sm">Email: {order.email}</p>
+                              {order.phone && <p className="text-gray-400 text-sm">Phone: {order.phone}</p>}
+                            </div>
+                          </div>
+
+                          {/* Order Items */}
+                          <div>
+                            <h4 className="text-white font-semibold text-sm mb-3">Order Items:</h4>
+                            <div className="space-y-2">
+                              {order.items.map((item, idx) => (
+                                <div key={idx} className="bg-neutral-800 p-3 rounded border border-gray-700 flex justify-between items-center">
+                                  <div>
+                                    <p className="text-white font-medium">{item.book?.title || `Book #${item.book_id}`}</p>
+                                    <p className="text-gray-400 text-sm">Qty: {item.quantity}</p>
+                                  </div>
+                                  <p className="text-white font-medium">{(item.price_at_purchase * item.quantity).toFixed(2)} zł</p>
                                 </div>
-                                <p className="text-white font-medium">{(item.price_at_purchase * item.quantity).toFixed(2)} zł</p>
-                              </div>
-                            ))}
+                              ))}
+                            </div>
                           </div>
                         </div>
                       </td>
