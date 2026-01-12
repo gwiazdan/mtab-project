@@ -18,7 +18,7 @@ The goal of this project is to develop a simple web application based on a relat
 
 5. **Access to Book Catalog** – Users will have the ability to browse the book catalog through a prepared user interface.
 
-6. **Book Search** – The user interface will contain a search field that allows users to search for books by title, publisher, author, and genre.
+6. **Book Search** – The user interface will contain a search field that allows users to search for books by title.
 
 7. **Book Filtering** – The user interface will contain filtering options to narrow down search results using additional book information.
 
