@@ -1,0 +1,2 @@
+# Enforce LF for shell scripts to avoid /bin/sh execution issues on Windows
+*.sh text eol=lf

@@ -32,4 +32,4 @@ clean:
 	docker-compose -f docker-compose.dev.yml down -v
 
 clean-images:
-	docker image rm mtab-project-backend mtab-project-frontend 2>/dev/null || true
+	docker image rm mtab-project-backend mtab-project-nginx 2>/dev/null || true
