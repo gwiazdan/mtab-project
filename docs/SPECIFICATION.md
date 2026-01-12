@@ -24,11 +24,13 @@ The goal of this project is to develop a simple web application based on a relat
 
 8. **Book Details** – Each book in the catalog can be viewed by clicking on it.
 
-9. **Book Ordering** – Users will have the ability to order books. For simulation purposes, users will not have access to a shopping cart, and each order will be a separate object in the database.
+9. **Shopping Cart** – Users can add books to a shopping cart and manage multiple items before placing an order.
 
-10. **Order Review** – The administrator will have access to a list of orders in the administration panel.
+10. **Book Ordering** – Users will have the ability to place orders containing one or multiple books from their shopping cart.
 
-11. **Administrator Authentication** – The application provides a login system for administrators with username and password authentication. Administrators can change their password on first login.
+11. **Order Review** – The administrator will have access to a list of orders in the administration panel.
+
+12. **Administrator Authentication** – The application provides a login system for administrators with username and password authentication. Administrators can change their password on first login.
 
 ## Database Schema
 
