@@ -19,6 +19,7 @@ const Shop: React.FC = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const { addItem } = useCart();
   const { logout } = useAuth();
 
@@ -78,7 +79,8 @@ const Shop: React.FC = () => {
         {books.map((book) => (
           <div
             key={book.id}
-            className="bg-neutral-900 p-4 border border-gray-800 rounded-lg shadow-xs hover:shadow-md transition-shadow"
+            onClick={() => setSelectedBook(book)}
+            className="bg-neutral-900 p-4 border border-gray-800 rounded-lg shadow-xs hover:shadow-md transition-shadow cursor-pointer"
           >
             {/* Book Image Placeholder */}
             <div className="mb-4 bg-gray-800 rounded-lg w-full aspect-square flex items-center justify-center">
@@ -124,7 +126,10 @@ const Shop: React.FC = () => {
               </span>
               <button
                 type="button"
-                onClick={() => addItem(book)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  addItem(book);
+                }}
                 className="inline-flex items-center gap-1.5 text-black bg-white hover:bg-black hover:text-white rounded-lg font-semibold px-3 py-2 transition-colors text-sm cursor-pointer"
               >
                 <svg className="w-6 h-6" viewBox="0 -1.02 19.036 19.036" xmlns="http://www.w3.org/2000/svg">
@@ -190,6 +195,143 @@ const Shop: React.FC = () => {
             Next →
           </button>
         </div>
+      )}
+
+      {/* Book Preview Modal */}
+      {selectedBook && (
+        <>
+          {/* Overlay blur background */}
+          <div
+            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+            onClick={() => setSelectedBook(null)}
+          />
+
+          {/* Modal card */}
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-neutral-900 border border-gray-800 rounded-lg">
+              {/* Header with back button */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-800 sticky top-0 bg-neutral-900">
+                <button
+                  onClick={() => setSelectedBook(null)}
+                  className="flex items-center justify-center w-10 h-10 rounded-full text-gray-400 hover:bg-gray-800 hover:text-white transition-colors text-xl cursor-pointer"
+                >
+                  ←
+                </button>
+                <h2 className="text-2xl font-bold text-white">{selectedBook.title}</h2>
+                <div className="w-6" /> {/* Spacer for centering */}
+              </div>
+
+              {/* Modal Content */}
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  {/* Left: Book Image */}
+                  <div className="md:col-span-1 flex flex-col items-center">
+                    <div className="bg-gray-800 rounded-lg w-full aspect-[2/3] flex items-center justify-center mb-4">
+                      <img
+                        src={`/book-placeholder.svg`}
+                        alt={selectedBook.title}
+                        className="w-full h-full object-cover rounded-lg"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300"%3E%3Crect fill="%23374151" width="200" height="300"/%3E%3Ctext x="50%25" y="50%25" font-size="16" fill="%239CA3AF" text-anchor="middle" dominant-baseline="middle" font-family="Arial"%3ENo image%3C/text%3E%3C/svg%3E';
+                        }}
+                      />
+                    </div>
+                    {/* Availability Badge */}
+                    <div className="w-full text-center">
+                      <span className={`inline-block px-4 py-2 rounded-lg font-medium ${
+                        selectedBook.stock > 0
+                          ? 'bg-green-900 text-green-400 border border-green-700'
+                          : 'bg-red-900 text-red-400 border border-red-700'
+                      }`}>
+                        {selectedBook.stock > 0
+                          ? `${selectedBook.stock} in stock`
+                          : 'Out of stock'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Right: Book Details */}
+                  <div className="md:col-span-2 space-y-6">
+                    {/* Authors */}
+                    <div>
+                      <p className="text-sm text-gray-400 mb-1">Authors</p>
+                      <p className="text-lg text-white">
+                        {selectedBook.authors && selectedBook.authors.length > 0
+                          ? selectedBook.authors.map((a) => a.name).join(', ')
+                          : 'Unknown Author'}
+                      </p>
+                    </div>
+
+                    {/* Description */}
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-300 mb-2">Description</h3>
+                      <p className="text-gray-400 leading-relaxed">
+                        {selectedBook.description || 'No description available'}
+                      </p>
+                    </div>
+
+                    {/* Details Grid */}
+                    <div className="grid grid-cols-2 gap-4 p-4 bg-neutral-800 rounded-lg">
+                      <div>
+                        <p className="text-xs font-medium text-gray-400 mb-1">ISBN</p>
+                        <p className="text-white">{selectedBook.isbn || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium text-gray-400 mb-1">Year</p>
+                        <p className="text-white">{selectedBook.published_year || 'N/A'}</p>
+                      </div>
+                      <div className="col-span-2">
+                        <p className="text-xs font-medium text-gray-400 mb-1">Publisher</p>
+                        <p className="text-white">{selectedBook.publisher?.name || 'Unknown'}</p>
+                      </div>
+                    </div>
+
+                    {/* Genres */}
+                    {selectedBook.genres && selectedBook.genres.length > 0 && (
+                      <div>
+                        <p className="text-xs font-medium text-gray-400 mb-2">Genres</p>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedBook.genres.map((genre) => (
+                            <span
+                              key={genre.id}
+                              className="bg-gray-800 text-gray-300 px-3 py-1 rounded-full text-xs"
+                            >
+                              {genre.name}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Price & Add to Cart */}
+                    <div className="pt-6 border-t border-gray-800 flex items-end justify-between">
+                      <div>
+                        <p className="text-xs font-medium text-gray-400 mb-1">Price</p>
+                        <p className="text-4xl font-bold text-white">
+                          {selectedBook.price.toFixed(2)} zł
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          addItem(selectedBook);
+                          setSelectedBook(null);
+                        }}
+                        className="inline-flex items-center gap-2 text-black bg-white hover:bg-black hover:text-white rounded-lg font-semibold px-6 py-3 transition-colors cursor-pointer"
+                      >
+                        <svg className="w-5 h-5" viewBox="0 -1.02 19.036 19.036" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M379.806,829.36c-.678,1.556-1.213,2.66-2.709,2.66h-8.128a2.664,2.664,0,0,1-2.71-2.66l-.316-5.346v-1.722l-2.911-2.589.7-.708,3.158,2.755h.049v2.264h15.125Zm-12.849-4.382.292,4.382a1.874,1.874,0,0,0,1.72,1.633H377.1c.9,0,1.24-.72,1.626-1.633l1.93-4.382Zm2.017,1.013h8.949v1h-8.949ZM375.952,829h-6.978v-1h6.978Zm-7.478,4a1.5,1.5,0,1,1-1.5,1.5A1.5,1.5,0,0,1,368.474,833Zm-.531,1.969h1V834h-1ZM376.474,833a1.5,1.5,0,1,1-1.5,1.5A1.5,1.5,0,0,1,376.474,833Zm-.531,1.969h1V834h-1Z" transform="translate(-363.032 -818.995)" fill="currentColor"/>
+                        </svg>
+                        Add to Cart
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
       )}
     </>
   );
