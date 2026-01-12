@@ -25,6 +25,12 @@ docker-compose build
 docker-compose up
 
 # Application is now available at http://localhost
+
+# Admin panel available at http://localhost/admin
+# Login credentials:
+# y: admin p: admin
+# Password change gui will pop up after the first login
+
 ```
 
 ## 📚 Documentation
